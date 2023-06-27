@@ -1,10 +1,6 @@
 dependencies:
   - type: olm.package
     value:
-      packageName: rabbitmq-cluster-operator
-      version: ">=0.0.0"
-  - type: olm.package
-    value:
       packageName: cinder-operator
       version: ">=0.0.0"
   - type: olm.package
@@ -75,3 +71,11 @@ dependencies:
     value:
       packageName: telemetry-operator
       version: ">=0.0.0"
+  - type: olm.constraint
+      - failureMessage: No rabbitmq-cluster-operator
+        package:
+          name: rabbitmq-cluster-operator
+          versionRange: '>=0.0.0'
+      - failureMessage: Product must equal openstack
+        cel:
+          rule: 'properties.exists(p, p.product == "openstack")'
