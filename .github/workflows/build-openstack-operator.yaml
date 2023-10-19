@@ -122,7 +122,7 @@ jobs:
         image: openstack-operator-bundle
         tags: ${{ env.latesttag }} ${{ github.sha }}
         containerfiles: |
-          ./custom-bundle.Dockerfile.pinned
+          ./custom-bundle.Dockerfile
 
     - name: Push openstack-operator-bundle To ${{ env.imageregistry }}
       uses: redhat-actions/push-to-registry@v2
