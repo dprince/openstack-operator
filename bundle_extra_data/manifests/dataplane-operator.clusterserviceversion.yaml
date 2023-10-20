@@ -1,0 +1,1092 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "dataplane.openstack.org/v1beta1",
+          "kind": "OpenStackDataPlaneDeployment",
+          "metadata": {
+            "name": "openstack-edpm"
+          },
+          "spec": {
+            "nodeSets": [
+              "openstack-edpm"
+            ]
+          }
+        },
+        {
+          "apiVersion": "dataplane.openstack.org/v1beta1",
+          "kind": "OpenStackDataPlaneNodeSet",
+          "metadata": {
+            "name": "openstack-edpm-ceph",
+            "namespace": "openstack"
+          },
+          "spec": {
+            "env": [
+              {
+                "name": "ANSIBLE_CALLBACKS_ENABLED",
+                "value": "profile_tasks"
+              },
+              {
+                "name": "ANSIBLE_FORCE_COLOR",
+                "value": "True"
+              },
+              {
+                "name": "ANSIBLE_ENABLE_TASK_DEBUGGER",
+                "value": "True"
+              }
+            ],
+            "networkAttachments": [
+              "ctlplane"
+            ],
+            "nodeTemplate": {
+              "ansible": {
+                "ansiblePort": 22,
+                "ansibleUser": "cloud-admin",
+                "ansibleVars": {
+                  "ctlplane_dns_nameservers": [
+                    "192.168.122.1"
+                  ],
+                  "ctlplane_gateway_ip": "192.168.122.1",
+                  "ctlplane_host_routes": [
+                    {
+                      "ip_netmask": "0.0.0.0/0",
+                      "next_hop": "192.168.122.1"
+                    }
+                  ],
+                  "ctlplane_mtu": 1500,
+                  "ctlplane_subnet_cidr": 24,
+                  "dns_search_domains": [],
+                  "edpm_chrony_ntp_servers": [
+                    "pool.ntp.org"
+                  ],
+                  "edpm_iscsid_image": "{{ registry_url }}/openstack-iscsid:{{ image_tag }}",
+                  "edpm_logrotate_crond_image": "{{ registry_url }}/openstack-cron:{{ image_tag }}",
+                  "edpm_network_config_hide_sensitive_logs": false,
+                  "edpm_network_config_template": "---\n{% set mtu_list = [ctlplane_mtu] %}\n{% for network in role_networks %}\n{{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}\n{%- endfor %}\n{% set min_viable_mtu = mtu_list | max %}\nnetwork_config:\n- type: ovs_bridge\n  name: {{ neutron_physical_bridge_name }}\n  mtu: {{ min_viable_mtu }}\n  use_dhcp: false\n  dns_servers: {{ ctlplane_dns_nameservers }}\n  domain: {{ dns_search_domains }}\n  addresses:\n  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}\n  routes: {{ ctlplane_host_routes }}\n  members:\n  - type: interface\n    name: nic1\n    mtu: {{ min_viable_mtu }}\n    # force the MAC address of the bridge to this interface\n    primary: true\n{% for network in role_networks %}\n  - type: vlan\n    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}\n    vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}\n    addresses:\n    - ip_netmask:\n        {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}\n    routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}\n{% endfor %}\n",
+                  "edpm_nodes_validation_validate_controllers_icmp": false,
+                  "edpm_nodes_validation_validate_gateway_icmp": false,
+                  "edpm_nova_compute_container_image": "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}",
+                  "edpm_nova_libvirt_container_image": "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}",
+                  "edpm_ovn_controller_agent_image": "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}",
+                  "edpm_ovn_metadata_agent_image": "{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}",
+                  "edpm_selinux_mode": "enforcing",
+                  "edpm_sshd_allowed_ranges": [
+                    "192.168.122.0/24"
+                  ],
+                  "edpm_sshd_configure_firewall": true,
+                  "enable_debug": false,
+                  "external_cidr": "24",
+                  "external_host_routes": [],
+                  "external_mtu": 1500,
+                  "external_vlan_id": 44,
+                  "gather_facts": false,
+                  "image_tag": "current-podified",
+                  "internal_api_cidr": "24",
+                  "internal_api_host_routes": [],
+                  "internal_api_mtu": 1500,
+                  "internal_api_vlan_id": 20,
+                  "networks_lower": {
+                    "External": "external",
+                    "InternalApi": "internal_api",
+                    "Storage": "storage",
+                    "Tenant": "tenant"
+                  },
+                  "neutron_physical_bridge_name": "br-ex",
+                  "neutron_public_interface_name": "eth0",
+                  "registry_url": "quay.io/podified-antelope-centos9",
+                  "role_networks": [
+                    "InternalApi",
+                    "Storage",
+                    "Tenant"
+                  ],
+                  "service_net_map": {
+                    "nova_api_network": "internal_api",
+                    "nova_libvirt_network": "internal_api"
+                  },
+                  "storage_cidr": "24",
+                  "storage_host_routes": [],
+                  "storage_mtu": 9000,
+                  "storage_vlan_id": 21,
+                  "tenant_cidr": "24",
+                  "tenant_host_routes": [],
+                  "tenant_mtu": 1500,
+                  "tenant_vlan_id": 22
+                }
+              },
+              "ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+              "extraMounts": [
+                {
+                  "extraVolType": "Logs",
+                  "mounts": [
+                    {
+                      "mountPath": "/runner/artifacts",
+                      "name": "ansible-logs"
+                    }
+                  ],
+                  "volumes": [
+                    {
+                      "name": "ansible-logs",
+                      "persistentVolumeClaim": {
+                        "claimName": "ansible-ee-logs"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "extraVolType": "Ceph",
+                  "mounts": [
+                    {
+                      "mountPath": "/etc/ceph",
+                      "name": "ceph",
+                      "readOnly": true
+                    }
+                  ],
+                  "volumes": [
+                    {
+                      "name": "ceph",
+                      "projected": {
+                        "sources": [
+                          {
+                            "secret": {
+                              "name": "ceph-conf-files"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "managementNetwork": "ctlplane"
+            },
+            "nodes": {
+              "edpm-compute-0": {
+                "ansible": {
+                  "ansibleHost": "192.168.122.100"
+                },
+                "hostName": "edpm-compute-0",
+                "networks": [
+                  {
+                    "defaultRoute": true,
+                    "fixedIP": "192.168.122.100",
+                    "name": "CtlPlane",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "InternalApi",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "Storage",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "Tenant",
+                    "subnetName": "subnet1"
+                  }
+                ]
+              },
+              "edpm-compute-1": {
+                "ansible": {
+                  "ansibleHost": "192.168.122.101"
+                },
+                "hostName": "edpm-compute-1",
+                "networks": [
+                  {
+                    "defaultRoute": true,
+                    "fixedIP": "192.168.122.101",
+                    "name": "CtlPlane",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "InternalApi",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "Storage",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "Tenant",
+                    "subnetName": "subnet1"
+                  }
+                ]
+              },
+              "edpm-compute-2": {
+                "ansible": {
+                  "ansibleHost": "192.168.122.102"
+                },
+                "hostName": "edpm-compute-2",
+                "networks": [
+                  {
+                    "defaultRoute": true,
+                    "fixedIP": "192.168.122.102",
+                    "name": "CtlPlane",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "InternalApi",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "Storage",
+                    "subnetName": "subnet1"
+                  },
+                  {
+                    "name": "Tenant",
+                    "subnetName": "subnet1"
+                  }
+                ]
+              }
+            },
+            "preProvisioned": true,
+            "services": [
+              "configure-network",
+              "validate-network",
+              "install-os",
+              "configure-os",
+              "run-os",
+              "ceph-client",
+              "ovn",
+              "neutron-metadata",
+              "libvirt",
+              "nova-custom-ceph"
+            ]
+          }
+        },
+        {
+          "apiVersion": "dataplane.openstack.org/v1beta1",
+          "kind": "OpenStackDataPlaneNodeSet",
+          "metadata": {
+            "name": "openstack-edpm-custom-network"
+          },
+          "spec": {
+            "env": [
+              {
+                "name": "ANSIBLE_FORCE_COLOR",
+                "value": "True"
+              },
+              {
+                "name": "ANSIBLE_ENABLE_TASK_DEBUGGER",
+                "value": "True"
+              },
+              {
+                "name": "ANSIBLE_VERBOSITY",
+                "value": 4
+              },
+              {
+                "name": "ANSIBLE_HOST_KEY_CHECKING",
+                "value": false
+              }
+            ],
+            "networkAttachments": [
+              "ctlplane"
+            ],
+            "nodeTemplate": {
+              "ansible": {
+                "ansiblePort": 22,
+                "ansibleUser": "cloud-admin",
+                "ansibleVars": {
+                  "ctlplane_dns_nameservers": [
+                    "192.168.1.254"
+                  ],
+                  "ctlplane_gateway_ip": "192.168.1.254",
+                  "ctlplane_host_routes": [
+                    {
+                      "ip_netmask": "0.0.0.0/0",
+                      "next_hop": "192.168.1.254"
+                    }
+                  ],
+                  "ctlplane_mtu": 1500,
+                  "ctlplane_subnet_cidr": 24,
+                  "dns_search_domains": [],
+                  "edpm_network_config_hide_sensitive_logs": false,
+                  "edpm_network_config_template": "---\n{% set mtu_list = [ctlplane_mtu] %}\n{% for network in role_networks %}\n{{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}\n{%- endfor %}\n{% set min_viable_mtu = mtu_list | max %}\nnetwork_config:\n- type: ovs_bridge\n  name: {{ neutron_physical_bridge_name }}\n  mtu: {{ min_viable_mtu }}\n  use_dhcp: false\n  dns_servers: {{ ctlplane_dns_nameservers }}\n  domain: {{ dns_search_domains }}\n  addresses:\n  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}\n  routes: {{ ctlplane_host_routes }}\n  members:\n  - type: interface\n    name: nic1\n    mtu: {{ min_viable_mtu }}\n    # force the MAC address of the bridge to this interface\n    primary: true\n{% for network in role_networks %}\n  - type: vlan\n    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}\n    vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}\n    addresses:\n    - ip_netmask:\n        {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}\n    routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}\n{% endfor %}\n",
+                  "edpm_network_config_update": false,
+                  "edpm_nodes_validation_validate_controllers_icmp": false,
+                  "edpm_nodes_validation_validate_gateway_icmp": false,
+                  "edpm_ovn_dbs": [
+                    "192.168.24.1"
+                  ],
+                  "edpm_selinux_mode": "enforcing",
+                  "edpm_sshd_allowed_ranges": [
+                    "192.168.0.0/24",
+                    "172.20.0.0/16"
+                  ],
+                  "edpm_sshd_configure_firewall": true,
+                  "enable_debug": false,
+                  "external_cidr": "24",
+                  "external_host_routes": [],
+                  "external_mtu": 1500,
+                  "external_vlan_id": 4,
+                  "gather_facts": false,
+                  "internal_api_cidr": "24",
+                  "internal_api_host_routes": [],
+                  "internal_api_mtu": 1500,
+                  "internal_api_vlan_id": 20,
+                  "networks_lower": {
+                    "External": "external",
+                    "InternalApi": "internal_api",
+                    "Storage": "storage",
+                    "Tenant": "tenant"
+                  },
+                  "neutron_physical_bridge_name": "br-ex",
+                  "neutron_public_interface_name": "enp7s0",
+                  "role_networks": [
+                    "InternalApi",
+                    "Storage",
+                    "Tenant",
+                    "External"
+                  ],
+                  "storage_cidr": "24",
+                  "storage_host_routes": [],
+                  "storage_mtu": 1500,
+                  "storage_vlan_id": 21,
+                  "tenant_cidr": "24",
+                  "tenant_host_routes": [],
+                  "tenant_mtu": 1500,
+                  "tenant_vlan_id": 22
+                }
+              },
+              "ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+              "managementNetwork": "ctlplane",
+              "networkConfig": {
+                "template": "---\nnetwork_config:\n- type: interface\n  name: nic2\n  mtu: 1500\n  addresses:\n    - ip_netmask:\n        {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}\n- type: ovs_bridge\n  name: {{ neutron_physical_bridge_name }}\n  mtu: 1500\n  use_dhcp: false\n  dns_servers: {{ ctlplane_dns_nameservers }}\n  domain: []\n  addresses:\n  - ip_netmask: {{ lookup('vars', networks_lower[\"External\"] ~ '_ip') }}/{{ lookup('vars', networks_lower[\"External\"] ~ '_cidr') }}\n  routes: [{'ip_netmask': '0.0.0.0/0', 'next_hop': '192.168.1.254'}]\n  members:\n  - type: interface\n    name: nic1\n    mtu: 1500\n    # force the MAC address of the bridge to this interface\n    primary: true\n  - type: vlan\n    mtu: 1500\n    vlan_id: 20\n    addresses:\n    - ip_netmask:\n        172.17.0.101/24\n    routes: []\n  - type: vlan\n    mtu: 1500\n    vlan_id: 25\n    addresses:\n    - ip_netmask:\n        172.18.0.101/24\n    routes: []\n  - type: vlan\n    mtu: 1500\n    vlan_id: 22\n    addresses:\n    - ip_netmask:\n        172.19.0.101/24\n    routes: []\n"
+              }
+            },
+            "nodes": {
+              "edpm-compute-0": {
+                "ansible": {
+                  "ansibleHost": "192.168.1.5",
+                  "ansibleVars": {
+                    "ansible_ssh_transfer_method": "scp",
+                    "ctlplane_ip": "192.168.1.5",
+                    "external_ip": "172.20.12.76",
+                    "fqdn_internal_api": "edpm-compute-1.example.com",
+                    "internal_api_ip": "172.17.0.101",
+                    "storage_ip": "172.18.0.101",
+                    "tenant_ip": "172.19.0.101"
+                  }
+                },
+                "hostName": "edpm-compute-0"
+              }
+            },
+            "services": [
+              "download-cache",
+              "configure-network",
+              "validate-network",
+              "install-os",
+              "configure-os",
+              "run-os",
+              "ovn",
+              "neutron-metadata",
+              "libvirt",
+              "nova",
+              "telemetry"
+            ]
+          }
+        },
+        {
+          "apiVersion": "dataplane.openstack.org/v1beta1",
+          "kind": "OpenStackDataPlaneNodeSet",
+          "metadata": {
+            "name": "openstack-edpm-ipam"
+          },
+          "spec": {
+            "baremetalSetTemplate": {
+              "bmhLabelSelector": {
+                "app": "openstack"
+              },
+              "cloudUserName": "cloud-admin",
+              "ctlplaneInterface": "enp1s0"
+            },
+            "env": [
+              {
+                "name": "ANSIBLE_FORCE_COLOR",
+                "value": "True"
+              },
+              {
+                "name": "ANSIBLE_ENABLE_TASK_DEBUGGER",
+                "value": "True"
+              }
+            ],
+            "networkAttachments": [
+              "ctlplane"
+            ],
+            "nodeTemplate": {
+              "ansible": {
+                "ansiblePort": 22,
+                "ansibleUser": "cloud-admin",
+                "ansibleVars": {
+                  "edpm_chrony_ntp_servers": [
+                    "pool.ntp.org"
+                  ],
+                  "edpm_iscsid_image": "{{ registry_url }}/openstack-iscsid:{{ image_tag }}",
+                  "edpm_logrotate_crond_image": "{{ registry_url }}/openstack-cron:{{ image_tag }}",
+                  "edpm_network_config_hide_sensitive_logs": false,
+                  "edpm_network_config_template": "---\n{% set mtu_list = [ctlplane_mtu] %}\n{% for network in role_networks %}\n{{ mtu_list.append(lookup('vars', networks_lower[network] ~ '_mtu')) }}\n{%- endfor %}\n{% set min_viable_mtu = mtu_list | max %}\nnetwork_config:\n- type: ovs_bridge\n  name: {{ neutron_physical_bridge_name }}\n  mtu: {{ min_viable_mtu }}\n  use_dhcp: false\n  dns_servers: {{ ctlplane_dns_nameservers }}\n  domain: {{ dns_search_domains }}\n  addresses:\n  - ip_netmask: {{ ctlplane_ip }}/{{ ctlplane_subnet_cidr }}\n  routes: {{ ctlplane_host_routes }}\n  members:\n  - type: interface\n    name: nic1\n    mtu: {{ min_viable_mtu }}\n    # force the MAC address of the bridge to this interface\n    primary: true\n{% for network in role_networks %}\n  - type: vlan\n    mtu: {{ lookup('vars', networks_lower[network] ~ '_mtu') }}\n    vlan_id: {{ lookup('vars', networks_lower[network] ~ '_vlan_id') }}\n    addresses:\n    - ip_netmask:\n        {{ lookup('vars', networks_lower[network] ~ '_ip') }}/{{ lookup('vars', networks_lower[network] ~ '_cidr') }}\n    routes: {{ lookup('vars', networks_lower[network] ~ '_host_routes') }}\n{% endfor %}\n",
+                  "edpm_neutron_metadata_agent_image": "{{ registry_url }}/openstack-neutron-metadata-agent-ovn:{{ image_tag }}",
+                  "edpm_nodes_validation_validate_controllers_icmp": false,
+                  "edpm_nodes_validation_validate_gateway_icmp": false,
+                  "edpm_nova_compute_container_image": "{{ registry_url }}/openstack-nova-compute:{{ image_tag }}",
+                  "edpm_nova_libvirt_container_image": "{{ registry_url }}/openstack-nova-libvirt:{{ image_tag }}",
+                  "edpm_ovn_controller_agent_image": "{{ registry_url }}/openstack-ovn-controller:{{ image_tag }}",
+                  "edpm_selinux_mode": "enforcing",
+                  "edpm_sshd_allowed_ranges": [
+                    "192.168.111.0/24"
+                  ],
+                  "edpm_sshd_configure_firewall": true,
+                  "enable_debug": false,
+                  "gather_facts": false,
+                  "image_tag": "current-podified",
+                  "neutron_physical_bridge_name": "br-ex",
+                  "neutron_public_interface_name": "eth0",
+                  "registry_url": "quay.io/podified-antelope-centos9",
+                  "service_net_map": {
+                    "nova_api_network": "internal_api",
+                    "nova_libvirt_network": "internal_api"
+                  }
+                }
+              },
+              "ansibleSSHPrivateKeySecret": "dataplane-ansible-ssh-private-key-secret",
+              "managementNetwork": "ctlplane",
+              "networks": [
+                {
+                  "defaultRoute": true,
+                  "name": "CtlPlane",
+                  "subnetName": "subnet1"
+                },
+                {
+                  "name": "InternalApi",
+                  "subnetName": "subnet1"
+                },
+                {
+                  "name": "Storage",
+                  "subnetName": "subnet1"
+                },
+                {
+                  "name": "Tenant",
+                  "subnetName": "subnet1"
+                }
+              ]
+            },
+            "nodes": {
+              "edpm-compute-0": {
+                "hostName": "edpm-compute-0"
+              }
+            },
+            "services": [
+              "download-cache",
+              "configure-network",
+              "validate-network",
+              "install-os",
+              "configure-os",
+              "run-os",
+              "ovn",
+              "neutron-metadata",
+              "libvirt",
+              "nova",
+              "telemetry"
+            ]
+          }
+        },
+        {
+          "apiVersion": "dataplane.openstack.org/v1beta1",
+          "kind": "OpenStackDataPlaneService",
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/created-by": "dataplane-operator",
+              "app.kubernetes.io/instance": "openstackdataplaneservice-sample",
+              "app.kubernetes.io/managed-by": "kustomize",
+              "app.kubernetes.io/name": "openstackdataplaneservice",
+              "app.kubernetes.io/part-of": "dataplane-operator"
+            },
+            "name": "openstackdataplaneservice-sample"
+          },
+          "spec": null
+        }
+      ]
+    capabilities: Basic Install
+    createdAt: "2023-10-15T10:25:24Z"
+    operators.openshift.io/infrastructure-features: '["disconnected"]'
+    operators.operatorframework.io/builder: operator-sdk-v1.31.0
+    operators.operatorframework.io/operator-type: non-standalone
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+  name: dataplane-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+      - description: OpenStackDataPlaneDeployment is the Schema for the openstackdataplanedeployments API
+        displayName: OpenStack Data Plane Deployments
+        kind: OpenStackDataPlaneDeployment
+        name: openstackdataplanedeployments.dataplane.openstack.org
+        statusDescriptors:
+          - description: Conditions
+            displayName: Conditions
+            path: conditions
+            x-descriptors:
+              - urn:alm:descriptor:io.kubernetes.conditions
+          - description: Deployed
+            displayName: Deployed
+            path: deployed
+            x-descriptors:
+              - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+        version: v1beta1
+      - description: OpenStackDataPlaneNodeSet is the Schema for the openstackdataplanenodesets API
+        displayName: OpenStack Data Plane NodeSet
+        kind: OpenStackDataPlaneNodeSet
+        name: openstackdataplanenodesets.dataplane.openstack.org
+        specDescriptors:
+          - description: AnsiblePort SSH port for Ansible connection
+            displayName: Ansible Port
+            path: nodeTemplate.ansible.ansiblePort
+            x-descriptors:
+              - urn:alm:descriptor:com.tectonic.ui:number
+          - description: 'AnsibleSSHPrivateKeySecret Name of a private SSH key secret containing private SSH key for connecting to node. The named secret must be of the form: Secret.data.ssh-privatekey: <base64 encoded private key contents> <https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets>'
+            displayName: Ansible SSHPrivate Key Secret
+            path: nodeTemplate.ansibleSSHPrivateKeySecret
+            x-descriptors:
+              - urn:alm:descriptor:io.kubernetes:Secret
+          - description: AnsiblePort SSH port for Ansible connection
+            displayName: Ansible Port
+            path: nodes.ansible.ansiblePort
+            x-descriptors:
+              - urn:alm:descriptor:com.tectonic.ui:number
+          - description: PreProvisioned - Whether the nodes are actually pre-provisioned (True) or should be preprovisioned (False)
+            displayName: Pre Provisioned
+            path: preProvisioned
+            x-descriptors:
+              - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+        statusDescriptors:
+          - description: Conditions
+            displayName: Conditions
+            path: conditions
+            x-descriptors:
+              - urn:alm:descriptor:io.kubernetes.conditions
+          - description: Deployed
+            displayName: Deployed
+            path: deployed
+            x-descriptors:
+              - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+        version: v1beta1
+      - description: OpenStackDataPlaneService is the Schema for the openstackdataplaneservices API
+        displayName: OpenStack Data Plane Service
+        kind: OpenStackDataPlaneService
+        name: openstackdataplaneservices.dataplane.openstack.org
+        statusDescriptors:
+          - description: Conditions
+            displayName: Conditions
+            path: conditions
+            x-descriptors:
+              - urn:alm:descriptor:io.kubernetes.conditions
+        version: v1beta1
+  description: The OpenStack DataPlane Operator
+  displayName: OpenStack DataPlane Operator
+  icon:
+    - base64data: ""
+      mediatype: ""
+  install:
+    spec:
+      clusterPermissions:
+        - rules:
+            - apiGroups:
+                - ansibleee.openstack.org
+              resources:
+                - openstackansibleees
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - baremetal.openstack.org
+              resources:
+                - openstackbaremetalsets
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - batch
+              resources:
+                - jobs
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - ""
+              resources:
+                - configmaps
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - ""
+              resources:
+                - secrets
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - ""
+              resources:
+                - services
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplanedeployments
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplanedeployments/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplanedeployments/status
+              verbs:
+                - get
+                - patch
+                - update
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplanenodesets
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplanenodesets/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplanenodesets/status
+              verbs:
+                - get
+                - patch
+                - update
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplaneservices
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplaneservices/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - dataplane.openstack.org
+              resources:
+                - openstackdataplaneservices/status
+              verbs:
+                - get
+                - patch
+                - update
+            - apiGroups:
+                - discovery.k8s.io
+              resources:
+                - endpointslices
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - k8s.cni.cncf.io
+              resources:
+                - network-attachment-definitions
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - dnsdata
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - dnsdata/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - dnsdata/status
+              verbs:
+                - get
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - dnsmasqs
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - dnsmasqs/status
+              verbs:
+                - get
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - ipsets
+              verbs:
+                - create
+                - delete
+                - get
+                - list
+                - patch
+                - update
+                - watch
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - ipsets/finalizers
+              verbs:
+                - update
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - ipsets/status
+              verbs:
+                - get
+            - apiGroups:
+                - network.openstack.org
+              resources:
+                - netconfigs
+              verbs:
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - authentication.k8s.io
+              resources:
+                - tokenreviews
+              verbs:
+                - create
+            - apiGroups:
+                - authorization.k8s.io
+              resources:
+                - subjectaccessreviews
+              verbs:
+                - create
+          serviceAccountName: dataplane-operator-controller-manager
+      deployments:
+        - label:
+            control-plane: controller-manager
+            openstack.org/operator-name: dataplane
+          name: dataplane-operator-controller-manager
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                openstack.org/operator-name: dataplane
+            strategy: {}
+            template:
+              metadata:
+                annotations:
+                  kubectl.kubernetes.io/default-container: manager
+                labels:
+                  control-plane: controller-manager
+                  openstack.org/operator-name: dataplane
+              spec:
+                containers:
+                  - args:
+                      - --secure-listen-address=0.0.0.0:8443
+                      - --upstream=http://127.0.0.1:8080/
+                      - --logtostderr=true
+                      - --v=0
+                    image: gcr.io/kubebuilder/kube-rbac-proxy@sha256:d99a8d144816b951a67648c12c0b988936ccd25cf3754f3cd85ab8c01592248f
+                    name: kube-rbac-proxy
+                    ports:
+                      - containerPort: 8443
+                        name: https
+                        protocol: TCP
+                    resources:
+                      limits:
+                        cpu: 500m
+                        memory: 128Mi
+                      requests:
+                        cpu: 5m
+                        memory: 64Mi
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                  - args:
+                      - --health-probe-bind-address=:8081
+                      - --metrics-bind-address=127.0.0.1:8080
+                    command:
+                      - /manager
+                    env:
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_FRR_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-frr@sha256:3d07c90c63ceb82b7ff13e73b71d056a9ba179f457642ae31b4e20ae2ce337f1
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_ISCSID_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-iscsid@sha256:a289c7e1a071f4088575b6872d6f8eb53638e662d01c08e47e6dd6e051b6895a
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_LOGROTATE_CROND_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-cron@sha256:0872e2157f1b5ca0e707a79672caeaeea814e342983411544be6dee65986d61b
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_NOVA_COMPUTE_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-nova-compute@sha256:62572a53f7df45bce13964fa3bb9621875640cc82515b28c09cac877ce31bbed
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_NOVA_LIBVIRT_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-nova-libvirt@sha256:7ddf4ad62729ea032de3e26479ea81b091b3ca4b835adb1bac76f987646ef17b
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_OVN_CONTROLLER_AGENT_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-ovn-controller@sha256:8ec63e55cc02d3ad6dde8d0e139079f0ca8e50ec7355c319f5dfaa6bcc7758ae
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_NEUTRON_METADATA_AGENT_DEFAULT_IMG
+                        value: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn@sha256:2495220f90734ab6567f3155c7f6abbcbc01e06aa41fefeabb39b25985109153
+                      - name: RELATED_IMAGE_OPENSTACK_EDPM_OVN_BGP_AGENT_IMAGE
+                        value: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent@sha256:0a19e84a39ffdcb043e629c50741b505aa649769d392d182b988617253cd3efe
+                    image: quay.io/openstack-k8s-operators/dataplane-operator@sha256:8cd5276cd27b56f7d37337ad4d1b40322a16be38d87db56ee7b8c5ed297964af
+                    livenessProbe:
+                      httpGet:
+                        path: /healthz
+                        port: 8081
+                      initialDelaySeconds: 15
+                      periodSeconds: 20
+                    name: manager
+                    ports:
+                      - containerPort: 9443
+                        name: webhook-server
+                        protocol: TCP
+                    readinessProbe:
+                      httpGet:
+                        path: /readyz
+                        port: 8081
+                      initialDelaySeconds: 5
+                      periodSeconds: 10
+                    resources:
+                      limits:
+                        cpu: 500m
+                        memory: 256Mi
+                      requests:
+                        cpu: 10m
+                        memory: 128Mi
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                    volumeMounts:
+                      - mountPath: /tmp/k8s-webhook-server/serving-certs
+                        name: cert
+                        readOnly: true
+                securityContext:
+                  runAsNonRoot: true
+                serviceAccountName: dataplane-operator-controller-manager
+                terminationGracePeriodSeconds: 10
+                volumes:
+                  - name: cert
+                    secret:
+                      defaultMode: 420
+                      secretName: webhook-server-cert
+      permissions:
+        - rules:
+            - apiGroups:
+                - ""
+              resources:
+                - configmaps
+              verbs:
+                - get
+                - list
+                - watch
+                - create
+                - update
+                - patch
+                - delete
+            - apiGroups:
+                - coordination.k8s.io
+              resources:
+                - leases
+              verbs:
+                - get
+                - list
+                - watch
+                - create
+                - update
+                - patch
+                - delete
+            - apiGroups:
+                - ""
+              resources:
+                - events
+              verbs:
+                - create
+                - patch
+          serviceAccountName: dataplane-operator-controller-manager
+    strategy: deployment
+  installModes:
+    - supported: true
+      type: OwnNamespace
+    - supported: false
+      type: SingleNamespace
+    - supported: false
+      type: MultiNamespace
+    - supported: true
+      type: AllNamespaces
+  keywords:
+    - openstack
+    - dataplane
+  links:
+    - name: Dataplane Operator
+      url: https://openstack-k8s-operators.github.io/dataplane-operator
+  maintainers:
+    - email: rhos-upgrades@redhat.com
+      name: RHOS Uprades
+  maturity: alpha
+  provider:
+    name: rhosp
+  relatedImages:
+    - image: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent@sha256:0a19e84a39ffdcb043e629c50741b505aa649769d392d182b988617253cd3efe
+      name: openstack_edpm_ovn_bgp_agent_image
+    - image: gcr.io/kubebuilder/kube-rbac-proxy@sha256:d99a8d144816b951a67648c12c0b988936ccd25cf3754f3cd85ab8c01592248f
+      name: kube-rbac-proxy
+    - image: quay.io/podified-antelope-centos9/openstack-nova-compute@sha256:62572a53f7df45bce13964fa3bb9621875640cc82515b28c09cac877ce31bbed
+      name: openstack_edpm_nova_compute_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn@sha256:2495220f90734ab6567f3155c7f6abbcbc01e06aa41fefeabb39b25985109153
+      name: openstack_edpm_neutron_metadata_agent_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-frr@sha256:3d07c90c63ceb82b7ff13e73b71d056a9ba179f457642ae31b4e20ae2ce337f1
+      name: openstack-edpm-frr-default-img
+    - image: quay.io/podified-antelope-centos9/openstack-iscsid@sha256:a289c7e1a071f4088575b6872d6f8eb53638e662d01c08e47e6dd6e051b6895a
+      name: openstack-edpm-iscsid-default-img
+    - image: quay.io/openstack-k8s-operators/dataplane-operator@sha256:8cd5276cd27b56f7d37337ad4d1b40322a16be38d87db56ee7b8c5ed297964af
+      name: manager
+    - image: quay.io/podified-antelope-centos9/openstack-iscsid@sha256:a289c7e1a071f4088575b6872d6f8eb53638e662d01c08e47e6dd6e051b6895a
+      name: openstack_edpm_iscsid_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-cron@sha256:0872e2157f1b5ca0e707a79672caeaeea814e342983411544be6dee65986d61b
+      name: openstack_edpm_logrotate_crond_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-nova-libvirt@sha256:7ddf4ad62729ea032de3e26479ea81b091b3ca4b835adb1bac76f987646ef17b
+      name: openstack_edpm_nova_libvirt_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-cron@sha256:0872e2157f1b5ca0e707a79672caeaeea814e342983411544be6dee65986d61b
+      name: openstack-edpm-logrotate-crond-default-img
+    - image: quay.io/podified-antelope-centos9/openstack-ovn-bgp-agent@sha256:0a19e84a39ffdcb043e629c50741b505aa649769d392d182b988617253cd3efe
+      name: openstack-edpm-ovn-bgp-agent-image
+    - image: quay.io/podified-antelope-centos9/openstack-ovn-controller@sha256:8ec63e55cc02d3ad6dde8d0e139079f0ca8e50ec7355c319f5dfaa6bcc7758ae
+      name: openstack-edpm-ovn-controller-agent-default-img
+    - image: quay.io/podified-antelope-centos9/openstack-neutron-metadata-agent-ovn@sha256:2495220f90734ab6567f3155c7f6abbcbc01e06aa41fefeabb39b25985109153
+      name: openstack-edpm-neutron-metadata-agent-default-img
+    - image: quay.io/podified-antelope-centos9/openstack-frr@sha256:3d07c90c63ceb82b7ff13e73b71d056a9ba179f457642ae31b4e20ae2ce337f1
+      name: openstack_edpm_frr_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-ovn-controller@sha256:8ec63e55cc02d3ad6dde8d0e139079f0ca8e50ec7355c319f5dfaa6bcc7758ae
+      name: openstack_edpm_ovn_controller_agent_default_img
+    - image: quay.io/podified-antelope-centos9/openstack-nova-compute@sha256:62572a53f7df45bce13964fa3bb9621875640cc82515b28c09cac877ce31bbed
+      name: openstack-edpm-nova-compute-default-img
+    - image: quay.io/podified-antelope-centos9/openstack-nova-libvirt@sha256:7ddf4ad62729ea032de3e26479ea81b091b3ca4b835adb1bac76f987646ef17b
+      name: openstack-edpm-nova-libvirt-default-img
+  version: 0.0.1
+  webhookdefinitions:
+    - admissionReviewVersions:
+        - v1
+      containerPort: 443
+      deploymentName: dataplane-operator-controller-manager
+      failurePolicy: Fail
+      generateName: mopenstackdataplanenodeset.kb.io
+      rules:
+        - apiGroups:
+            - dataplane.openstack.org
+          apiVersions:
+            - v1beta1
+          operations:
+            - CREATE
+            - UPDATE
+          resources:
+            - openstackdataplanenodesets
+      sideEffects: None
+      targetPort: 9443
+      type: MutatingAdmissionWebhook
+      webhookPath: /mutate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
+    - admissionReviewVersions:
+        - v1
+      containerPort: 443
+      deploymentName: dataplane-operator-controller-manager
+      failurePolicy: Fail
+      generateName: vopenstackdataplanenodeset.kb.io
+      rules:
+        - apiGroups:
+            - dataplane.openstack.org
+          apiVersions:
+            - v1beta1
+          operations:
+            - CREATE
+            - UPDATE
+          resources:
+            - openstackdataplanenodesets
+      sideEffects: None
+      targetPort: 9443
+      type: ValidatingAdmissionWebhook
+      webhookPath: /validate-dataplane-openstack-org-v1beta1-openstackdataplanenodeset
