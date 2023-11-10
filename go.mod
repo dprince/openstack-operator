@@ -8,7 +8,7 @@ require (
 	github.com/imdario/mergo v0.3.16
 	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.28.0
-	github.com/openstack-k8s-operators/cinder-operator/api v0.3.0
+	github.com/openstack-k8s-operators/cinder-operator/api v0.2.0
 	github.com/openstack-k8s-operators/dataplane-operator/api v0.2.0
 	github.com/openstack-k8s-operators/glance-operator/api v0.2.0
 	github.com/openstack-k8s-operators/heat-operator/api v0.2.0
@@ -20,14 +20,14 @@ require (
 	github.com/openstack-k8s-operators/manila-operator/api v0.2.0
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.2.0
 	github.com/openstack-k8s-operators/neutron-operator/api v0.2.0
-	github.com/openstack-k8s-operators/nova-operator/api v0.3.0
+	github.com/openstack-k8s-operators/nova-operator/api v0.2.0
 	github.com/openstack-k8s-operators/octavia-operator/api v0.2.0
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.2.0
-	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.3.1-0.20231005142619-75b1fbd8777c
-	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20230725141229-4ce90d0120fd
+	github.com/openstack-k8s-operators/openstack-baremetal-operator/api v0.2.0
+	github.com/openstack-k8s-operators/openstack-operator/apis v0.0.0-20231109200217-27ec7a859d9d
 	github.com/openstack-k8s-operators/ovn-operator/api v0.2.0
-	github.com/openstack-k8s-operators/placement-operator/api v0.3.0
-	github.com/openstack-k8s-operators/swift-operator/api v0.3.0
+	github.com/openstack-k8s-operators/placement-operator/api v0.2.0
+	github.com/openstack-k8s-operators/swift-operator/api v0.2.0
 	github.com/openstack-k8s-operators/telemetry-operator/api v0.2.0
 	github.com/operator-framework/api v0.17.6
 	github.com/rabbitmq/cluster-operator/v2 v2.5.0
@@ -75,7 +75,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible
-	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.1.1-0.20231001084618-12369665b166 //indirect
+	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.2.0 //indirect
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.2.0 //indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
