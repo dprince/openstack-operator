@@ -19,7 +19,7 @@ import (
 )
 
 // ReconcileBarbican -
-func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	barbican := &barbicanv1.Barbican{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "barbican",
@@ -98,6 +98,10 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 	helper.GetLogger().Info("Reconciling Barbican", "Barbican.Namespace", instance.Namespace, "Barbican.Name", "barbican")
 	op, err := controllerutil.CreateOrPatch(ctx, helper.GetClient(), barbican, func() error {
 		instance.Spec.Barbican.Template.DeepCopyInto(&barbican.Spec)
+
+		barbican.Spec.BarbicanAPI.ContainerImage = *version.Status.ContainerImages.BarbicanApiImage
+		barbican.Spec.BarbicanWorker.ContainerImage = *version.Status.ContainerImages.BarbicanWorkerImage
+		barbican.Spec.BarbicanKeystoneListener.ContainerImage = *version.Status.ContainerImages.BarbicanKeystoneListenerImage
 
         // FIXME: barbican webhooks are not setting this correctly yet
 		if barbican.Spec.DatabaseAccount == "" {
