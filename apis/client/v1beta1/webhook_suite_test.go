@@ -55,7 +55,7 @@ var (
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecs(t, "Webhook Suite")
+	RunSpecs(t, "OpenStackClient Webhook Suite")
 }
 
 var _ = BeforeSuite(func() {
