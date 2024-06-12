@@ -242,6 +242,32 @@ rules:
 - apiGroups:
   - core.openstack.org
   resources:
+  - foocontrolplanes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - foocontrolplanes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - foocontrolplanes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - core.openstack.org
+  resources:
   - openstackcontrolplanes
   verbs:
   - create

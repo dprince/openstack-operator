@@ -1,0 +1,27 @@
+# permissions for end users to view foocontrolplanes.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: foocontrolplane-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: foocontrolplane-viewer-role
+rules:
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - foocontrolplanes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - core.openstack.org
+  resources:
+  - foocontrolplanes/status
+  verbs:
+  - get

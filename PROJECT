@@ -77,4 +77,13 @@ resources:
   kind: OpenStackDataPlaneDeployment
   path: github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: openstack.org
+  group: core
+  kind: FooControlPlane
+  path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2
+  version: v1beta2
 version: "3"
