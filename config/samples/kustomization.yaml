@@ -1,12 +1,3 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- core_v1beta1_openstackcontrolplane.yaml
-- core_v1beta1_openstackcontrolplane_collapsed_cell.yaml
-- core_v1beta1_openstackcontrolplane_network_isolation.yaml
-- client_v1beta1_openstackclient.yaml
-- core_v1beta1_openstackversion.yaml
-- dataplane_v1beta1_openstackdataplanenodeset.yaml
-- dataplane_v1beta1_openstackdataplaneservice.yaml
-- dataplane_v1beta1_openstackdataplanedeployment.yaml
-- core_v1beta2_foocontrolplane.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
