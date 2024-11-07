@@ -27,6 +27,19 @@ const (
 	telemetryName           = "telemetry"
 )
 
+func ensureKsmImageDefault(version *corev1beta1.OpenStackVersion) *string {
+	// NOTE(mmagr): for case upgrade case where KSM image is not part of OpenStackVersion
+	// yet we temporarily need to ensure image default is passed
+	var ksmImageTempDefault = "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.0"
+
+	ksmImage := version.Status.ContainerImages.KsmImage
+	if ksmImage == nil {
+		ksmImage = &ksmImageTempDefault
+	}
+
+	return ksmImage
+}
+
 // ReconcileTelemetry puts telemetry resources to required state
 func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	telemetry := &telemetryv1.Telemetry{
@@ -283,7 +296,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		telemetry.Spec.Ceilometer.NotificationImage = *version.Status.ContainerImages.CeilometerNotificationImage
 		telemetry.Spec.Ceilometer.SgCoreImage = *version.Status.ContainerImages.CeilometerSgcoreImage
 		telemetry.Spec.Ceilometer.ProxyImage = *version.Status.ContainerImages.CeilometerProxyImage
-		telemetry.Spec.Ceilometer.KSMImage = *version.Status.ContainerImages.KsmImage
+		telemetry.Spec.Ceilometer.KSMImage = *(ensureKsmImageDefault(version))
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.APIImage = *version.Status.ContainerImages.AodhAPIImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.EvaluatorImage = *version.Status.ContainerImages.AodhEvaluatorImage
 		telemetry.Spec.Autoscaling.AutoscalingSpec.Aodh.NotifierImage = *version.Status.ContainerImages.AodhNotifierImage
@@ -331,7 +344,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 		instance.Status.ContainerImages.CeilometerNotificationImage = version.Status.ContainerImages.CeilometerNotificationImage
 		instance.Status.ContainerImages.CeilometerSgcoreImage = version.Status.ContainerImages.CeilometerSgcoreImage
 		instance.Status.ContainerImages.CeilometerProxyImage = version.Status.ContainerImages.CeilometerProxyImage
-		instance.Status.ContainerImages.KsmImage = version.Status.ContainerImages.KsmImage
+		instance.Status.ContainerImages.KsmImage = ensureKsmImageDefault(version)
 		instance.Status.ContainerImages.AodhAPIImage = version.Status.ContainerImages.AodhAPIImage
 		instance.Status.ContainerImages.AodhEvaluatorImage = version.Status.ContainerImages.AodhEvaluatorImage
 		instance.Status.ContainerImages.AodhNotifierImage = version.Status.ContainerImages.AodhNotifierImage
@@ -359,6 +372,7 @@ func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStac
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerSgcoreImage, version.Status.ContainerImages.CeilometerSgcoreImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerProxyImage, version.Status.ContainerImages.CeilometerProxyImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhAPIImage, version.Status.ContainerImages.AodhAPIImage) ||
+			!stringPointersEqual(controlPlane.Status.ContainerImages.KsmImage, ensureKsmImageDefault(version)) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhEvaluatorImage, version.Status.ContainerImages.AodhEvaluatorImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhNotifierImage, version.Status.ContainerImages.AodhNotifierImage) ||
 			!stringPointersEqual(controlPlane.Status.ContainerImages.AodhListenerImage, version.Status.ContainerImages.AodhListenerImage) {
