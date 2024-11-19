@@ -15396,6 +15396,9 @@ spec:
                               secret: osp-secret
                               serviceUser: aodh
                             properties:
+                              apiTimeout:
+                                default: 60
+                                type: integer
                               customServiceConfig:
                                 default: '# add your customization here'
                                 type: string
@@ -15510,7 +15513,6 @@ spec:
                                 type: object
                             required:
                             - databaseInstance
-                            - memcachedInstance
                             - secret
                             type: object
                           enabled:
@@ -15544,6 +15546,9 @@ spec:
                         type: object
                       ceilometer:
                         properties:
+                          apiTimeout:
+                            default: 60
+                            type: integer
                           customServiceConfig:
                             default: '# add your customization here'
                             type: string
