@@ -8,6 +8,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dprince/designate-operator/api v0.0.0-20241120001048-ee4deb984cee h1:rs5mIfVXTh5l797gxf7ZbuGuhTpcNcwnB9fk8frbLqA=
+github.com/dprince/designate-operator/api v0.0.0-20241120001048-ee4deb984cee/go.mod h1:aLc4dvPi5Bqb8FXnZ14YYRWFjZOmUdj+eJmaUPNZ5Qs=
 github.com/emicklei/go-restful/v3 v3.11.2 h1:1onLa9DcsMYO9P+CXaL0dStDqQ2EHHXLiz+BtnqkLAU=
 github.com/emicklei/go-restful/v3 v3.11.2/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/evanphx/json-patch v5.7.0+incompatible h1:vgGkfT/9f8zE6tvSCe74nfpAVDQ2tG6yudJd8LBksgI=
@@ -104,8 +106,6 @@ github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114094618
 github.com/openstack-k8s-operators/barbican-operator/api v0.5.1-0.20241114094618-6febb2d8d6a4/go.mod h1:Xn5DqgDkAT61fI88mBHsMfyzD4xNh0dYcSI90B3Io08=
 github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241114094619-8cd575ca0e60 h1:kpojOnJkO8mC962fidyCUDwayju8U9NPkmScYfQ9dxA=
 github.com/openstack-k8s-operators/cinder-operator/api v0.5.1-0.20241114094619-8cd575ca0e60/go.mod h1:3NvCHOoCyzcZm046XctbsU/Dx+en3l8jG3nHhZyWOAA=
-github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241114094900-9ce3c64786da h1:f2jFQsWopZfBoiI4mIlO7RpGRJ+QYYlfQhy9X7f5Bns=
-github.com/openstack-k8s-operators/designate-operator/api v0.5.1-0.20241114094900-9ce3c64786da/go.mod h1:JZSzHp6f07mYkRB71xamFIPlgbFKvzIbv68ttwsEt/o=
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264 h1:gQXtUfjK1Nj2tSBwarVUlJXEWUiYgu2ovMWEtTBvC4Y=
 github.com/openstack-k8s-operators/glance-operator/api v0.5.1-0.20241114111414-1fdd7f486264/go.mod h1:bRqpa/WUQ7D99SAOXEPItxBobRP1oVUo93PWQukChIs=
 github.com/openstack-k8s-operators/heat-operator/api v0.5.1-0.20241112060409-5e91380094e6 h1:vxFlYgZD6jXGdGumhzyKRVgPwzBd4YxBOU0YrF9fxr8=
