@@ -9,4 +9,5 @@ resources:
 - dataplane_v1beta1_openstackdataplanenodeset_empty.yaml
 - dataplane_v1beta1_openstackdataplaneservice_empty.yaml
 - dataplane_v1beta1_openstackdataplanedeployment_empty.yaml
+- core_v1beta2_openstackcontrolplane.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

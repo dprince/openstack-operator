@@ -1,0 +1,12 @@
+apiVersion: core.openstack.org/v1beta2
+kind: OpenStackControlPlane
+metadata:
+  labels:
+    app.kubernetes.io/name: openstackcontrolplane
+    app.kubernetes.io/instance: openstackcontrolplane-sample
+    app.kubernetes.io/part-of: openstack-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: openstack-operator
+  name: openstackcontrolplane-sample
+spec:
+  # TODO(user): Add fields here
