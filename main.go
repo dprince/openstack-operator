@@ -82,6 +82,7 @@ import (
 	machineconfig "github.com/openshift/api/machineconfiguration/v1"
 	ocp_image "github.com/openshift/api/operator/v1alpha1"
 
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	clientcontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/client"
 	corecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/core"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
@@ -129,6 +130,7 @@ func init() {
 	utilruntime.Must(machineconfig.AddToScheme(scheme))
 	utilruntime.Must(k8s_networkv1.AddToScheme(scheme))
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
+	utilruntime.Must(corev1beta2.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
