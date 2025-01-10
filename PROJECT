@@ -94,4 +94,12 @@ resources:
   kind: OpenStackControlPlane
   path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2
   version: v1beta2
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: openstack.org
+  group: core
+  kind: OpenStackControlPlane
+  path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta3
+  version: v1beta3
 version: "3"

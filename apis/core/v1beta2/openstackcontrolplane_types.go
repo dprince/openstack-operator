@@ -849,7 +849,6 @@ type TLSCAStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:storageversion
 // +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack ControlPlane"
 // +kubebuilder:resource:shortName=osctlplane;osctlplanes;oscp;oscps
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
