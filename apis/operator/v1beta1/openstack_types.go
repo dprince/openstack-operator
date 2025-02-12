@@ -41,9 +41,11 @@ type OpenStackStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Operator Initialization"
 // +kubebuilder:printcolumn:name="Deployed Operator Count",type=integer,JSONPath=`.status.deployedOperatorCount`
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
-// OpenStack is the Schema for the openstacks API
+
+// OpenStack is the Schema for OpenStack Operator Initialization
 type OpenStack struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
