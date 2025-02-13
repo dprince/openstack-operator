@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	objectreferencesv1 "github.com/openshift/custom-resource-status/objectreferences/v1"
 	glancev1 "github.com/openstack-k8s-operators/glance-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -13,6 +14,7 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/reference"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -210,6 +212,16 @@ func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControl
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			corev1beta1.OpenStackControlPlaneGlanceReadyRunningMessage))
+	}
+
+	// Add it to the list of RelatedObjects if found
+	objectRef, err := reference.GetReference(helper.GetScheme(), glance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	err = objectreferencesv1.SetObjectReference(&instance.Status.RelatedObjects, *objectRef)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

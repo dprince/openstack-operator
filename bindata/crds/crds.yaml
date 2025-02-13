@@ -16997,6 +16997,26 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
+              relatedObjects:
+                items:
+                  properties:
+                    apiVersion:
+                      type: string
+                    fieldPath:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                    resourceVersion:
+                      type: string
+                    uid:
+                      type: string
+                  type: object
+                  x-kubernetes-map-type: atomic
+                type: array
               tls:
                 properties:
                   caBundleSecretName:

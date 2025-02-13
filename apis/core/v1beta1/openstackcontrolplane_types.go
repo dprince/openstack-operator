@@ -48,6 +48,7 @@ import (
 	rabbitmqv2 "github.com/rabbitmq/cluster-operator/v2/api/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -832,6 +833,10 @@ type OpenStackControlPlaneStatus struct {
 
 	//ObservedGeneration - the most recent generation observed for this object.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
+	// RelatedObjects - is a list of objects that are "interesting" or related to this operator.
+	// Used by the 'oc adm inspect' command
+	RelatedObjects []corev1.ObjectReference `json:"relatedObjects,omitempty"`
 }
 
 // TLSStatus defines the observed state of TLS
