@@ -1,0 +1,10 @@
+name: Foo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call-build-workflow:
+    uses: dprince/openstack-operator/.github/workflows/promote-pull-request.yaml@promotion_action
+    with:
+      operator_name: openstack

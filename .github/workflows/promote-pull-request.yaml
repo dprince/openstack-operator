@@ -1,0 +1,45 @@
+name: Promote k8s operator dependencies
+
+on:
+  workflow_call:
+    inputs:
+      operator_name:
+        required: true
+        type: string
+      branch_name:
+        default: 'main'
+        type: string
+
+jobs:
+
+  promote:
+    name: Generate a pull request to promote the latest openstack-k8s-operators dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Git config
+      run: |
+        git config user.name "openstack-k8s-operators-ci"
+        git config user.email "openstack-k8s-operators-ci@github.com"
+
+    - name: run make force-bump, tidy, manifests, generate
+      shell: bash
+      run: |
+        make force-bump
+        make tidy
+        make manifests generate
+
+    - name: run make bindata
+      if: inputs.operator_name == 'openstack'
+      shell: bash
+      run: |
+        BRANCH='${{ inputs.branch_name }}' make bindata
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        title: "openstack-k8s-operators dependency bump branch: ${{ github.ref_name }}"
+        branch: "openstack-dependency-bump/${{ github.ref_name }}" # always use the same branch
