@@ -1,0 +1,26 @@
+name: Promote k8s operator dependencies
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+
+  promote:
+    name: Generate a pull request to promote the latest k8s-operators in openstack-operator
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: execute a promotion
+      shell: bash
+      run: |
+        make force-bump
+        make tidy
+        make manifests generate
+        make bindata
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
