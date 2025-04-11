@@ -1,0 +1,16 @@
+name: Foo
+
+on:
+  workflow_dispatch:
+    branches:
+      - main
+      - 18.0-fr2
+  schedule:
+    - cron: '0 2 * * 6'  # 2AM UTC Saturday
+
+jobs:
+  call-build-workflow:
+    uses: dprince/openstack-operator/.github/workflows/promote-pull-request.yaml@promotion_action
+    with:
+      operator_name: openstack
+      branch_name: ${{ github.ref_name }}
