@@ -227,7 +227,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	// greenfield deployment
-	if controlPlane.Status.DeployedVersion == nil && !openstack.DataplaneNodesetsDeployedVersionIsSet(dataplaneNodesets) {
+	if controlPlane.Status.DeployedVersion == nil {
 		Log.Info("Waiting for controlplane and dataplane nodesets to be deployed.")
 		return ctrl.Result{}, nil
 	}
