@@ -8,6 +8,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dprince/infra-operator/apis v0.0.0-20250610123521-5c1f87bcf5eb h1:QKw8vxI7LLNvrLugX5Cd/AnJ+Kl6Hfv8I3u1r2NojBw=
+github.com/dprince/infra-operator/apis v0.0.0-20250610123521-5c1f87bcf5eb/go.mod h1:so/v+BENfwaidvyMDf75XF7UQFgqUQ90jTpkrQyR/WE=
 github.com/emicklei/go-restful/v3 v3.12.0 h1:y2DdzBAURM29NFF94q6RaY4vjIH1rtwDapwQtU84iWk=
 github.com/emicklei/go-restful/v3 v3.12.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/evanphx/json-patch v5.7.0+incompatible h1:vgGkfT/9f8zE6tvSCe74nfpAVDQ2tG6yudJd8LBksgI=
@@ -110,8 +112,6 @@ github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250605081242-a70
 github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20250605081242-a70ea110502e/go.mod h1:vMExlZbEsUE9+OnnjG5Q9BRHZUyDn/DLI6jXEZ/sR+c=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250605092656-8fef358c24e9 h1:dRiNHwVfgwVkaCC79myKurW4ba5lgomXTcQMtP0DeI8=
 github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20250605092656-8fef358c24e9/go.mod h1:xbjEv1corMTda5Mb1P4V0YyXn+yZKElMqXX4jNLZtW0=
-github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250601112854-cbb0f7bc989f h1:HreG40QDipNsBXI79mICwIzF4IIr+H1v9ecui8JjGxM=
-github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20250601112854-cbb0f7bc989f/go.mod h1:so/v+BENfwaidvyMDf75XF7UQFgqUQ90jTpkrQyR/WE=
 github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250604184922-baa8c091f1c5 h1:g4na4xcW5z+PZ/arEMlhpVHHwGy9F89qhW/IlTUBgkM=
 github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20250604184922-baa8c091f1c5/go.mod h1:M7kvJDX05kKVQI3JIW/uPUDK2bXnbW4P95oJVd48aCA=
 github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20250605095955-a8616555fe6d h1:pUbVG9eaD11Jz/NABcA5A01/yt7Wb5ntrxEF3KfQlLc=
