@@ -19,7 +19,8 @@ import (
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
-	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
+
 	"github.com/openstack-k8s-operators/lib-common/modules/certmanager"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/clusterdns"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -732,7 +733,7 @@ func SetupServiceOperatorDefaults() {
 	ironicv1.SetupDefaults()
 
 	// Keystone
-	keystonev1.SetupDefaults()
+	keystonev2.SetupDefaults()
 
 	// Manila
 	manilav1.SetupDefaults()

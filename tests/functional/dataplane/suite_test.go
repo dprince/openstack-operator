@@ -44,6 +44,7 @@ import (
 	infrav1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	baremetalv1 "github.com/openstack-k8s-operators/openstack-baremetal-operator/api/v1beta1"
 	openstackv1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	openstackv1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	dataplanecontrollers "github.com/openstack-k8s-operators/openstack-operator/controllers/dataplane"
 
@@ -155,6 +156,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = openstackv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = openstackv1beta2.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 	err = certmgrv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = machineconfig.AddToScheme(scheme.Scheme)
@@ -201,7 +204,7 @@ var _ = BeforeSuite(func() {
 	err = (&openstackv1.OpenStackVersion{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&openstackv1.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
+	err = (&openstackv1beta2.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 
 	kclient, err := kubernetes.NewForConfig(cfg)

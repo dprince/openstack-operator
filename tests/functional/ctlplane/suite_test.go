@@ -50,6 +50,7 @@ import (
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	dataplanev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
@@ -226,6 +227,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = corev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = corev1beta2.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 	err = routev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = cinderv1.AddToScheme(scheme.Scheme)
@@ -326,7 +329,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	err = (&corev1.OpenStackVersion{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
-	err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
+	err = (&corev1beta2.OpenStackControlPlane{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 	err = (&dataplanev1beta1.OpenStackDataPlaneNodeSet{}).SetupWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())

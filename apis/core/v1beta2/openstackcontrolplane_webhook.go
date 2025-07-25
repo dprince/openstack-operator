@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package v1beta2
 
 import (
 	"context"
@@ -25,6 +25,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
+
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -75,7 +76,7 @@ func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error 
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/validate-core-openstack-org-v1beta1-openstackcontrolplane,mutating=false,failurePolicy=Fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta1,name=vopenstackcontrolplane.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-core-openstack-org-v1beta2-openstackcontrolplane,mutating=false,failurePolicy=Fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta2,name=vopenstackcontrolplane.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Validator = &OpenStackControlPlane{}
 
@@ -263,7 +264,7 @@ func (r *OpenStackControlPlane) ValidateCreateServices(basePath *field.Path) (ad
 
 	// Call internal validation logic for individual service operators
 	if r.Spec.Keystone.Enabled {
-		errors = append(errors, r.Spec.Keystone.Template.ValidateCreate(basePath.Child("keystone").Child("template"), r.Namespace)...)
+		errors = append(errors, KeystoneValidateCreate(r.Spec.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
@@ -415,7 +416,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 		if old.Keystone.Template == nil {
 			old.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
-		errors = append(errors, r.Spec.Keystone.Template.ValidateUpdate(*old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
+		errors = append(errors, KeystoneValidateUpdate(r.Spec.Keystone.Template, *old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
 	}
 
@@ -734,7 +735,7 @@ func (r *OpenStackControlPlane) ValidateVersion() (field.ErrorList, error) {
 	return allErrs, nil
 }
 
-// +kubebuilder:webhook:path=/mutate-core-openstack-org-v1beta1-openstackcontrolplane,mutating=true,failurePolicy=fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta1,name=mopenstackcontrolplane.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/mutate-core-openstack-org-v1beta2-openstackcontrolplane,mutating=true,failurePolicy=fail,sideEffects=None,groups=core.openstack.org,resources=openstackcontrolplanes,verbs=create;update,versions=v1beta2,name=mopenstackcontrolplane.kb.io,admissionReviewVersions=v1
 
 var _ webhook.Defaulter = &OpenStackControlPlane{}
 
@@ -862,9 +863,9 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		if r.Spec.Keystone.Template == nil {
 			r.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
 		}
-		r.Spec.Keystone.Template.Default()
+		KeystoneDefault(r.Spec.Keystone.Template)
 		initializeOverrideSpec(&r.Spec.Keystone.APIOverride.Route, true)
-		r.Spec.Keystone.Template.SetDefaultRouteAnnotations(r.Spec.Keystone.APIOverride.Route.Annotations)
+		KeystoneSetDefaultRouteAnnotations(r.Spec.Keystone.Template, r.Spec.Keystone.APIOverride.Route.Annotations)
 	}
 
 	// Manila
