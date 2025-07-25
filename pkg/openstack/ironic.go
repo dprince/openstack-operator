@@ -12,6 +12,7 @@ import (
 
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileIronic -
-func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileIronic(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	ironic := &ironicv1.Ironic{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "ironic",
@@ -223,7 +224,7 @@ func ReconcileIronic(ctx context.Context, instance *corev1beta1.OpenStackControl
 }
 
 // IronicImagesCheck - return true if the ironic images match on the ControlPlane and Version, or if Ironic is not enabled
-func IronicImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func IronicImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Ironic.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.IronicAPIImage, version.Status.ContainerImages.IronicAPIImage) ||

@@ -12,6 +12,7 @@ import (
 
 	heatv1 "github.com/openstack-k8s-operators/heat-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -23,7 +24,7 @@ const (
 )
 
 // ReconcileHeat -
-func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileHeat(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	heat := &heatv1.Heat{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      heatName,
@@ -227,7 +228,7 @@ func ReconcileHeat(ctx context.Context, instance *corev1beta1.OpenStackControlPl
 }
 
 // HeatImageMatch - return true if the heat images match on the ControlPlane and Version, or if Heat is not enabled
-func HeatImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func HeatImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Heat.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.HeatAPIImage, version.Status.ContainerImages.HeatAPIImage) ||

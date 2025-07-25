@@ -22350,7 +22350,7 @@ spec:
                       databaseAccount:
                         default: keystone
                         type: string
-                      databaseInstance:
+                      databaseName:
                         type: string
                       defaultConfigOverwrite:
                         additionalProperties:
@@ -22845,6 +22845,8 @@ spec:
                         type: array
                       federatedRealmConfig:
                         type: string
+                      federationMountPath:
+                        type: string
                       fernetMaxActiveKeys:
                         default: 5
                         format: int32
@@ -23021,7 +23023,7 @@ spec:
                         default: false
                         type: boolean
                     required:
-                    - databaseInstance
+                    - databaseName
                     - memcachedInstance
                     - rabbitMqClusterName
                     - secret

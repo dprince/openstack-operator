@@ -10,6 +10,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -27,7 +28,7 @@ const (
 )
 
 // ReconcileGlance -
-func ReconcileGlance(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileGlance(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	glanceName, altGlanceName := instance.GetServiceName(corev1beta1.GlanceName, instance.Spec.Glance.UniquePodNames)
 	// Ensure the alternate cinder CR doesn't exist, as the ramdomPodNames flag may have been toggled
 	glance := &glancev1.Glance{
@@ -242,7 +243,7 @@ func getGlanceAPILabelMap(name string, apiName string, apiType string) map[strin
 }
 
 // GlanceImageMatch - return true if the glance images match on the ControlPlane and Version, or if Glance is not enabled
-func GlanceImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func GlanceImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Glance.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.GlanceAPIImage, version.Status.ContainerImages.GlanceAPIImage) {

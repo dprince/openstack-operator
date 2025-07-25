@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcilePlacementAPI -
-func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	placementAPI := &placementv1.PlacementAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "placement",
@@ -159,7 +160,7 @@ func ReconcilePlacementAPI(ctx context.Context, instance *corev1beta1.OpenStackC
 }
 
 // PlacementImageMatch - return true if the placement images match on the ControlPlane and Version, or if Placement is not enabled
-func PlacementImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func PlacementImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Placement.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.PlacementAPIImage, version.Status.ContainerImages.PlacementAPIImage) {

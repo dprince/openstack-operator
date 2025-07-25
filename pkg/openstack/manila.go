@@ -13,6 +13,7 @@ import (
 
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -20,7 +21,7 @@ import (
 )
 
 // ReconcileManila -
-func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileManila(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	manila := &manilav1.Manila{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "manila",
@@ -199,7 +200,7 @@ func ReconcileManila(ctx context.Context, instance *corev1beta1.OpenStackControl
 }
 
 // ManilaImageMatch - return true if the Manila images match on the ControlPlane and Version, or if Manila is not enabled
-func ManilaImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func ManilaImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Manila.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.ManilaAPIImage, version.Status.ContainerImages.ManilaAPIImage) ||

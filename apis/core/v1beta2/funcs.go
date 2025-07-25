@@ -19,7 +19,7 @@ package v1beta2
 import (
 	"context"
 
-	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,35 +28,26 @@ import (
 // KeystoneDefault is a no-op to be compatible with the old API
 // This function can be removed once openstack-operator is not calling the
 // Default method on the keystone spec anymore.
-func KeystoneDefault(spec *keystonev1.KeystoneAPISpecCore) {
-	//TODO: This is a no-op function to be compatible with the old API.
-	// This function can be removed once openstack-operator is not calling the
-	// Default method on the keystone spec anymore.
+func KeystoneDefault(spec *keystonev2.KeystoneAPISpecCore) {
+	// nothing to do
 }
 
 // KeystoneSetDefaultRouteAnnotations is a no-op to be compatible with the old API
 // This function can be removed once openstack-operator is not calling the
 // SetDefaultRouteAnnotations method on the keystone spec anymore.
-func KeystoneSetDefaultRouteAnnotations(spec *keystonev1.KeystoneAPISpecCore, annotations map[string]string) {
-	//TODO: This is a no-op function to be compatible with the old API.
-	// This function can be removed once openstack-operator is not calling the
-	// SetDefaultRouteAnnotations method on the keystone spec anymore.
+func KeystoneSetDefaultRouteAnnotations(spec *keystonev2.KeystoneAPISpecCore) {
+	// nothing to do
 }
 
-// KeystoneValidateCreate is a no-op to be compatible with the old API
-// This function can be removed once openstack-operator is not calling the
-// ValidateCreate method on the keystone spec anymore.
-func KeystoneValidateCreate(spec *keystonev1.KeystoneAPISpecCore, path *field.Path, namespace string) field.ErrorList {
-	//TODO: This is a no-op function to be compatible with the old API.
-	// This function can be removed once openstack-operator is not calling the
-	// ValidateCreate method on the keystone spec anymore.
+// KeystoneValidateCreate validates if KeystoneAPI fields are compatible
+func KeystoneValidateCreate(spec *keystonev2.KeystoneAPISpecCore, path *field.Path, namespace string) field.ErrorList {
 	return field.ErrorList{}
 }
 
 // KeystoneValidateUpdate is a no-op to be compatible with the old API
 // This function can be removed once openstack-operator is not calling the
 // ValidateUpdate method on the keystone spec anymore.
-func KeystoneValidateUpdate(spec *keystonev1.KeystoneAPISpecCore, old keystonev1.KeystoneAPISpecCore, path *field.Path, namespace string) field.ErrorList {
+func KeystoneValidateUpdate(spec *keystonev2.KeystoneAPISpecCore, old keystonev2.KeystoneAPISpecCore, path *field.Path, namespace string) field.ErrorList {
 	//TODO: This is a no-op function to be compatible with the old API.
 	// This function can be removed once openstack-operator is not calling the
 	// ValidateUpdate method on the keystone spec anymore.

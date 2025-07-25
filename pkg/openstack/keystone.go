@@ -8,21 +8,21 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
 
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // ReconcileKeystoneAPI -
-func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
-	keystoneAPI := &keystonev1.KeystoneAPI{
+func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+	keystoneAPI := &keystonev2.KeystoneAPI{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "keystone", //FIXME (keystone doesn't seem to work unless named "keystone")
+			Name:      "keystone",
 			Namespace: instance.Namespace,
 		},
 	}
@@ -40,7 +40,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 	}
 
 	if instance.Spec.Keystone.Template == nil {
-		instance.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+		instance.Spec.Keystone.Template = &keystonev2.KeystoneAPISpecCore{}
 	}
 
 	// add selector to service overrides
@@ -123,14 +123,14 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 		if keystoneAPI.Spec.Secret == "" {
 			keystoneAPI.Spec.Secret = instance.Spec.Secret
 		}
-		if keystoneAPI.Spec.DatabaseInstance == "" {
+		if keystoneAPI.Spec.DatabaseName == "" {
 			//keystoneAPI.Spec.DatabaseInstance = instance.Name // name of MariaDB we create here
-			keystoneAPI.Spec.DatabaseInstance = "openstack" //FIXME: see above
+			keystoneAPI.Spec.DatabaseName = "openstack" //FIXME: see above
 		}
 
 		// Append globally defined extraMounts to the service's own list.
 		for _, ev := range instance.Spec.ExtraMounts {
-			keystoneAPI.Spec.ExtraMounts = append(keystoneAPI.Spec.ExtraMounts, keystonev1.KeystoneExtraMounts{
+			keystoneAPI.Spec.ExtraMounts = append(keystoneAPI.Spec.ExtraMounts, keystonev2.KeystoneExtraMounts{
 				Name:      ev.Name,
 				Region:    ev.Region,
 				VolMounts: ev.VolMounts,
@@ -174,7 +174,7 @@ func ReconcileKeystoneAPI(ctx context.Context, instance *corev1beta1.OpenStackCo
 }
 
 // KeystoneImageMatch - return true if the keystone images match on the ControlPlane and Version, or if Keystone is not enabled
-func KeystoneImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func KeystoneImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Keystone.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.KeystoneAPIImage, version.Status.ContainerImages.KeystoneAPIImage) {

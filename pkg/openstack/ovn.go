@@ -13,6 +13,7 @@ import (
 
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,9 +22,9 @@ import (
 )
 
 // ReconcileOVN -
-func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileOVN(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	Log := GetLogger(ctx)
-	setOVNReadyError := func(instance *corev1beta1.OpenStackControlPlane, err error) {
+	setOVNReadyError := func(instance *corev1beta2.OpenStackControlPlane, err error) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			corev1beta1.OpenStackControlPlaneOVNReadyCondition,
 			condition.ErrorReason,
@@ -33,7 +34,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	}
 
 	if instance.Spec.Ovn.Template == nil {
-		instance.Spec.Ovn.Template = &corev1beta1.OvnResources{}
+		instance.Spec.Ovn.Template = &corev1beta2.OvnResources{}
 	}
 
 	OVNDBClustersReady, err := ReconcileOVNDbClusters(ctx, instance, version, helper)
@@ -72,7 +73,7 @@ func ReconcileOVN(ctx context.Context, instance *corev1beta1.OpenStackControlPla
 	return ctrl.Result{}, nil
 }
 
-func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
+func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 	dnsSuffix := clusterdns.GetDNSClusterDomain()
 
@@ -199,7 +200,7 @@ func ReconcileOVNDbClusters(ctx context.Context, instance *corev1beta1.OpenStack
 
 }
 
-func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
+func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
 	OVNNorthd := &ovnv1.OVNNorthd{
@@ -317,7 +318,7 @@ func ReconcileOVNNorthd(ctx context.Context, instance *corev1beta1.OpenStackCont
 
 }
 
-func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
+func ReconcileOVNController(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (bool, error) {
 	Log := GetLogger(ctx)
 
 	OVNController := &ovnv1.OVNController{
@@ -451,7 +452,7 @@ func ReconcileOVNController(ctx context.Context, instance *corev1beta1.OpenStack
 }
 
 // OVNControllerImageMatch - return true if the OVN Controller images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNControllerImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func OVNControllerImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Ovn.Enabled {
@@ -465,7 +466,7 @@ func OVNControllerImageMatch(ctx context.Context, controlPlane *corev1beta1.Open
 }
 
 // OVNDbClusterImageMatch - return true if the OVN DbCluster images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNDbClusterImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func OVNDbClusterImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Ovn.Enabled {
@@ -479,7 +480,7 @@ func OVNDbClusterImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenS
 }
 
 // OVNNorthImageMatch - return true if the OVN North images match on the ControlPlane and Version, or if OVN is not enabled
-func OVNNorthImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func OVNNorthImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Ovn.Enabled {

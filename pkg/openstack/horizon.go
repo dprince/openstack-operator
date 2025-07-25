@@ -14,6 +14,7 @@ import (
 
 	horizonv1 "github.com/openstack-k8s-operators/horizon-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -22,7 +23,7 @@ import (
 )
 
 // ReconcileHorizon -
-func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileHorizon(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	const (
 		HorizonHSTSHeaderAnnotation      string = "haproxy.router.openshift.io/hsts_header"
 		HorizonHSTSHeaderAnnotationValue string = "max-age=31536000;includeSubDomains;preload"
@@ -200,7 +201,7 @@ func ReconcileHorizon(ctx context.Context, instance *corev1beta1.OpenStackContro
 }
 
 // HorizonImageMatch - return true if horizon images match on the ControlPlane and Version, or if Horizon is not enabled
-func HorizonImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func HorizonImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Horizon.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.HorizonImage, version.Status.ContainerImages.HorizonImage) {

@@ -11,6 +11,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,7 +29,7 @@ const (
 )
 
 // ReconcileTelemetry puts telemetry resources to required state
-func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileTelemetry(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	telemetry := &telemetryv1.Telemetry{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      telemetryName,
@@ -256,7 +257,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			telemetry,
 			ceilometerSvcs,
 			nil,
-			corev1beta1.Override{},
+			corev1beta2.Override{},
 			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			tls.API{},
@@ -278,7 +279,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 				telemetry,
 				mysqldExporterSvcs,
 				nil,
-				corev1beta1.Override{},
+				corev1beta2.Override{},
 				corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
 				false, // TODO (mschuppert) could be removed when all integrated service support TLS
 				tls.API{},
@@ -300,7 +301,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 			telemetry,
 			ksmSvcs,
 			nil,
-			corev1beta1.Override{},
+			corev1beta2.Override{},
 			corev1beta1.OpenStackControlPlaneExposeTelemetryReadyCondition,
 			false, // TODO (mschuppert) could be removed when all integrated service support TLS
 			tls.API{},
@@ -401,7 +402,7 @@ func ReconcileTelemetry(ctx context.Context, instance *corev1beta1.OpenStackCont
 }
 
 // TelemetryImageMatch - return true if the telemetry images match on the ControlPlane and Version, or if Telemetry is not enabled
-func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func TelemetryImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Telemetry.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.CeilometerCentralImage, version.Status.ContainerImages.CeilometerCentralImage) ||

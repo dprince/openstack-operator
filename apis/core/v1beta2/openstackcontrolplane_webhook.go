@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	common_webhook "github.com/openstack-k8s-operators/lib-common/modules/common/webhook"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -414,7 +414,7 @@ func (r *OpenStackControlPlane) ValidateUpdateServices(old OpenStackControlPlane
 	// Call internal validation logic for individual service operators
 	if r.Spec.Keystone.Enabled {
 		if old.Keystone.Template == nil {
-			old.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+			old.Keystone.Template = &keystonev2.KeystoneAPISpecCore{}
 		}
 		errors = append(errors, KeystoneValidateUpdate(r.Spec.Keystone.Template, *old.Keystone.Template, basePath.Child("keystone").Child("template"), r.Namespace)...)
 		errors = append(errors, validateTLSOverrideSpec(&r.Spec.Keystone.APIOverride.Route, basePath.Child("keystone").Child("apiOverride").Child("route"))...)
@@ -861,11 +861,11 @@ func (r *OpenStackControlPlane) DefaultServices() {
 	// Keystone
 	if r.Spec.Keystone.Enabled || r.Spec.Keystone.Template != nil {
 		if r.Spec.Keystone.Template == nil {
-			r.Spec.Keystone.Template = &keystonev1.KeystoneAPISpecCore{}
+			r.Spec.Keystone.Template = &keystonev2.KeystoneAPISpecCore{}
 		}
 		KeystoneDefault(r.Spec.Keystone.Template)
 		initializeOverrideSpec(&r.Spec.Keystone.APIOverride.Route, true)
-		KeystoneSetDefaultRouteAnnotations(r.Spec.Keystone.Template, r.Spec.Keystone.APIOverride.Route.Annotations)
+		KeystoneSetDefaultRouteAnnotations(r.Spec.Keystone.Template)
 	}
 
 	// Manila

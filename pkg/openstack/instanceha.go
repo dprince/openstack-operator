@@ -9,6 +9,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -17,7 +18,7 @@ const (
 	InstanceHaImageKey  = "instanceha-image"
 )
 
-func ReconcileInstanceHa(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileInstanceHa(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	customData := map[string]string{
 		InstanceHaImageKey: *getImg(version.Status.ContainerImages.OpenstackClientImage, &missingImageDefault),
 	}

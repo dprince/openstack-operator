@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileSwift -
-func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileSwift(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	swift := &swiftv1.Swift{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "swift",
@@ -174,7 +175,7 @@ func ReconcileSwift(ctx context.Context, instance *corev1beta1.OpenStackControlP
 }
 
 // SwiftImageMatch - return true if the swift images match on the ControlPlane and Version, or if Swift is not enabled
-func SwiftImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func SwiftImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Swift.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.SwiftAccountImage, version.Status.ContainerImages.SwiftAccountImage) ||

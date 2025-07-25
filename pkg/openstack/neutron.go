@@ -16,6 +16,7 @@ import (
 
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -23,7 +24,7 @@ import (
 )
 
 // ReconcileNeutron -
-func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileNeutron(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	neutronAPI := &neutronv1.NeutronAPI{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "neutron",
@@ -210,7 +211,7 @@ func ReconcileNeutron(ctx context.Context, instance *corev1beta1.OpenStackContro
 }
 
 // NeutronImageMatch - return true if the neutron images match on the ControlPlane and Version, or if Neutron is not enabled
-func NeutronImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func NeutronImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Neutron.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.NeutronAPIImage, version.Status.ContainerImages.NeutronAPIImage) {

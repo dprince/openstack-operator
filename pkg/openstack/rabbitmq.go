@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	"k8s.io/utils/ptr"
 
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -43,7 +44,7 @@ const (
 
 func deleteUndefinedRabbitMQs(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 
@@ -90,7 +91,7 @@ func deleteUndefinedRabbitMQs(
 // ReconcileRabbitMQs -
 func ReconcileRabbitMQs(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
@@ -159,7 +160,7 @@ func ReconcileRabbitMQs(
 
 func reconcileRabbitMQ(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
@@ -295,7 +296,7 @@ func reconcileRabbitMQ(
 func removeRabbitmqClusterControllerReference(
 	ctx context.Context,
 	helper *helper.Helper,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	name string,
 ) error {
 	rabbitmqCluster := &rabbitmqv2.RabbitmqCluster{}
@@ -322,7 +323,7 @@ func removeRabbitmqClusterControllerReference(
 func removeConfigMapControllerReference(
 	ctx context.Context,
 	helper *helper.Helper,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	name string,
 ) error {
 	configMap := &corev1.ConfigMap{}
@@ -347,7 +348,7 @@ func removeConfigMapControllerReference(
 }
 
 // RabbitmqImageMatch - return true if the rabbitmq images match on the ControlPlane and Version, or if Rabbitmq is not enabled
-func RabbitmqImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func RabbitmqImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	log := GetLogger(ctx)
 	if controlPlane.Spec.Rabbitmq.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.RabbitmqImage, version.Status.ContainerImages.RabbitmqImage) {

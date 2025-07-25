@@ -12,6 +12,7 @@ import (
 
 	barbicanv1 "github.com/openstack-k8s-operators/barbican-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileBarbican -
-func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileBarbican(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	barbican := &barbicanv1.Barbican{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "barbican",
@@ -173,7 +174,7 @@ func ReconcileBarbican(ctx context.Context, instance *corev1beta1.OpenStackContr
 }
 
 // BarbicanImageMatch - return true if the Barbican images match on the ControlPlane and Version, or if Barbican is not enabled
-func BarbicanImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func BarbicanImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Barbican.Enabled {

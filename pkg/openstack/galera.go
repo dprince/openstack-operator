@@ -18,6 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,7 +34,7 @@ const (
 
 func deleteUndefinedGaleras(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 
@@ -81,7 +82,7 @@ func deleteUndefinedGaleras(
 // ReconcileGaleras -
 func ReconcileGaleras(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
@@ -208,7 +209,7 @@ func ReconcileGaleras(
 // reconcileGalera -
 func reconcileGalera(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
@@ -271,7 +272,7 @@ func reconcileGalera(
 }
 
 // GaleraImageMatch - return true if the Galera images match on the ControlPlane and Version, or if Galera is not enabled
-func GaleraImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func GaleraImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	log := GetLogger(ctx)
 	if controlPlane.Spec.Galera.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.MariadbImage, version.Status.ContainerImages.MariadbImage) {

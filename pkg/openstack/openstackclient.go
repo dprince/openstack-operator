@@ -21,6 +21,7 @@ import (
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	clientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,7 @@ const (
 )
 
 // ReconcileOpenStackClient -
-func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileOpenStackClient(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 
 	openstackclient := &clientv1.OpenStackClient{
 		ObjectMeta: metav1.ObjectMeta{
@@ -99,7 +100,7 @@ func ReconcileOpenStackClient(ctx context.Context, instance *corev1.OpenStackCon
 }
 
 // ClientImageMatch - return true if the openstackclient images match on the ControlPlane and Version, or if OpenstackClient is not enabled
-func ClientImageMatch(ctx context.Context, controlPlane *corev1.OpenStackControlPlane, version *corev1.OpenStackVersion) bool {
+func ClientImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	//FIXME: (dprince) - OpenStackClientSection should have Enabled?
 	if !stringPointersEqual(controlPlane.Status.ContainerImages.OpenstackClientImage, version.Status.ContainerImages.OpenstackClientImage) {

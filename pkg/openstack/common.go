@@ -36,10 +36,10 @@ import (
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
-	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 
 	// corev1 "k8s.io/api/core/v1"
-	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
 	ovnv1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swiftv1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
@@ -201,12 +201,12 @@ func (e *Endpoints) GetEndpointServiceOverrides() map[service.Endpoint]service.R
 // EnsureEndpointConfig -
 func EnsureEndpointConfig(
 	ctx context.Context,
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 	owner metav1.Object,
 	svcs *k8s_corev1.ServiceList,
 	svcOverrides map[service.Endpoint]service.RoutedOverrideSpec,
-	ingressOverride corev1.Override,
+	ingressOverride corev1beta2.Override,
 	condType condition.Type,
 	serviceTLSDisabled bool,
 	tlsConfig tls.API,
@@ -263,24 +263,24 @@ func EnsureEndpointConfig(
 					if err != nil {
 						if k8s_errors.IsNotFound(err) {
 							instance.Status.Conditions.Set(condition.FalseCondition(
-								corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+								corev1beta1.OpenStackControlPlaneCustomTLSReadyCondition,
 								condition.RequestedReason,
 								condition.SeverityInfo,
-								corev1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
+								corev1beta1.OpenStackControlPlaneCustomTLSReadyWaitingMessage,
 								ingressOverride.TLS.SecretName))
 							return endpoints, ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
 						}
 						instance.Status.Conditions.Set(condition.FalseCondition(
-							corev1.OpenStackControlPlaneCustomTLSReadyCondition,
+							corev1beta1.OpenStackControlPlaneCustomTLSReadyCondition,
 							condition.ErrorReason,
 							condition.SeverityWarning,
-							corev1.OpenStackControlPlaneCustomTLSReadyErrorMessage,
+							corev1beta1.OpenStackControlPlaneCustomTLSReadyErrorMessage,
 							ingressOverride.TLS.SecretName,
 							err.Error()))
 						return endpoints, ctrl.Result{}, err
 					}
-					instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCustomTLSReadyCondition,
-						corev1.OpenStackControlPlaneCustomTLSReadyMessage)
+					instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneCustomTLSReadyCondition,
+						corev1beta1.OpenStackControlPlaneCustomTLSReadyMessage)
 				} else {
 					ed.Route.TLS.IssuerName = instance.GetPublicIssuer()
 				}
@@ -409,7 +409,7 @@ func EnsureEndpointConfig(
 		if ed.EndpointURL != "" {
 			// Any trailing path will be added on the service-operator level.
 			ed.Service.OverrideSpec.EndpointURL = &ed.EndpointURL
-			instance.Status.Conditions.MarkTrue(condType, corev1.OpenStackControlPlaneExposeServiceReadyMessage, owner.GetName())
+			instance.Status.Conditions.MarkTrue(condType, corev1beta1.OpenStackControlPlaneExposeServiceReadyMessage, owner.GetName())
 		}
 
 		endpoints.EndpointDetails[ed.Type] = ed
@@ -420,7 +420,7 @@ func EnsureEndpointConfig(
 
 func (ed *EndpointDetail) ensureRoute(
 	ctx context.Context,
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 	svc *k8s_corev1.Service,
 	owner metav1.Object,
@@ -487,7 +487,7 @@ func (ed *EndpointDetail) ensureRoute(
 			instance.Status.Conditions.Set(condition.UnknownCondition(
 				condType,
 				condition.InitReason,
-				corev1.OpenStackControlPlaneExposeServiceReadyInitMessage,
+				corev1beta1.OpenStackControlPlaneExposeServiceReadyInitMessage,
 				owner.GetName(),
 				svc.Name,
 			))
@@ -506,7 +506,7 @@ func (ed *EndpointDetail) ensureRoute(
 				condType,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				corev1.OpenStackControlPlaneExposeServiceReadyErrorMessage,
+				corev1beta1.OpenStackControlPlaneExposeServiceReadyErrorMessage,
 				owner.GetName(),
 				ed.Name,
 				err.Error()))
@@ -526,7 +526,7 @@ func (ed *EndpointDetail) ensureRoute(
 // CreateRoute -
 func (ed *EndpointDetail) CreateRoute(
 	ctx context.Context,
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 	owner metav1.Object,
 ) (ctrl.Result, error) {
@@ -843,7 +843,7 @@ func DeleteCertificate(
 
 func DeleteCertsAndRoutes(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
 

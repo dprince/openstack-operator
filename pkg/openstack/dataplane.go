@@ -5,13 +5,14 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // GetDataplaneNodesets - returns the dataplanenodesets in the namespace of the controlplane
-func GetDataplaneNodesets(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (*dataplanev1.OpenStackDataPlaneNodeSetList, error) {
+func GetDataplaneNodesets(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, helper *helper.Helper) (*dataplanev1.OpenStackDataPlaneNodeSetList, error) {
 	// Get the dataplane nodesets
 	dataplaneNodesets := &dataplanev1.OpenStackDataPlaneNodeSetList{}
 	opts := []client.ListOption{

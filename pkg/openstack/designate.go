@@ -12,6 +12,7 @@ import (
 
 	designatev1 "github.com/openstack-k8s-operators/designate-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,7 +20,7 @@ import (
 )
 
 // ReconcileDesignate -
-func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileDesignate(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	designate := &designatev1.Designate{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "designate",
@@ -208,7 +209,7 @@ func ReconcileDesignate(ctx context.Context, instance *corev1beta1.OpenStackCont
 }
 
 // DesignateImageMatch - return true if the Designate images match on the ControlPlane and Version, or if Designate is not enabled
-func DesignateImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func DesignateImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 
 	if controlPlane.Spec.Designate.Enabled {

@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,7 +34,7 @@ const (
 // ReconcileRedis -
 func ReconcileRedis(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
@@ -157,7 +158,7 @@ func ReconcileRedis(
 // reconcileRedis -
 func reconcileRedis(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
@@ -266,7 +267,7 @@ func reconcileRedis(
 }
 
 // RedisImageMatch - return true if the redis images match on the ControlPlane and Version, or if Redis is not enabled
-func RedisImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func RedisImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Redis.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraRedisImage, version.Status.ContainerImages.InfraRedisImage) {

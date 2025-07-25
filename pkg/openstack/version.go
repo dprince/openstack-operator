@@ -9,6 +9,7 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -215,7 +216,7 @@ func InitializeOpenStackVersionServiceDefaults(ctx context.Context) *corev1beta1
 }
 
 // ReconcileVersion - reconciles OpenStackVersion CR
-func ReconcileVersion(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, *corev1beta1.OpenStackVersion, error) {
+func ReconcileVersion(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, *corev1beta1.OpenStackVersion, error) {
 	version := &corev1beta1.OpenStackVersion{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Name,
@@ -266,7 +267,7 @@ func stringPointersEqual(a, b *string) bool {
 
 // ControlplaneContainerImageMatch - function to compare the ContainerImages on the controlPlane to the OpenStackVersion
 // only enabled services are checked
-func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) (bool, []string) {
+func ControlplaneContainerImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) (bool, []string) {
 	failedMatches := []string{}
 	if BarbicanImageMatch(ctx, controlPlane, version) {
 		failedMatches = append(failedMatches, "Barbican")

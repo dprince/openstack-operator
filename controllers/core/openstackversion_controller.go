@@ -36,6 +36,7 @@ import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-operator/pkg/openstack"
 )
@@ -228,7 +229,7 @@ func (r *OpenStackVersionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	Log.Info("OpenStackVersion Initialized")
 
 	// lookup the current Controlplane object
-	controlPlane := &corev1beta1.OpenStackControlPlane{}
+	controlPlane := &corev1beta2.OpenStackControlPlane{}
 	err = r.Client.Get(ctx, client.ObjectKey{
 		Namespace: instance.Namespace,
 		Name:      instance.Name,

@@ -23,14 +23,15 @@ import (
 	"golang.org/x/exp/slices"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 
-	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ReconcileCAs -
-func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
+// ReconcileCAs - reconciles CAs
+func ReconcileCAs(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, helper *helper.Helper) (ctrl.Result, error) {
 	Log := GetLogger(ctx)
 
 	// create selfsigned-issuer
@@ -50,10 +51,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 	ctrlResult, err := issuer.CreateOrPatch(ctx, helper)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			corev1.OpenStackControlPlaneCAReadyErrorMessage,
+			corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 			issuerReq.Kind,
 			issuerReq.GetName(),
 			err.Error()))
@@ -61,10 +62,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		return ctrlResult, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			corev1.OpenStackControlPlaneCAReadyRunningMessage))
+			corev1beta1.OpenStackControlPlaneCAReadyRunningMessage))
 
 		return ctrlResult, nil
 	}
@@ -95,7 +96,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		}
 	}
 
-	instance.Status.TLS.CAList = []corev1.TLSCAStatus{}
+	instance.Status.TLS.CAList = []corev1beta2.TLSCAStatus{}
 	// create CA for ingress and public podLevel termination
 	issuerLabels := map[string]string{certmanager.RootCAIssuerPublicLabel: ""}
 	issuerAnnotations := getIssuerAnnotations(&instance.Spec.TLS.Ingress.Cert)
@@ -104,7 +105,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		err := removeIssuerLabel(
 			ctx,
 			helper,
-			corev1.IngressCaName,
+			corev1beta1.IngressCaName,
 			instance.Namespace,
 			issuerLabels,
 		)
@@ -117,7 +118,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			instance,
 			helper,
 			issuerReq,
-			corev1.IngressCaName,
+			corev1beta1.IngressCaName,
 			issuerLabels,
 			issuerAnnotations,
 			bundle,
@@ -136,10 +137,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1.OpenStackControlPlaneCAReadyCondition,
+				corev1beta1.OpenStackControlPlaneCAReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 				"issuer",
 				customIssuer,
 				err.Error()))
@@ -182,7 +183,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		err := removeIssuerLabel(
 			ctx,
 			helper,
-			corev1.InternalCaName,
+			corev1beta1.InternalCaName,
 			instance.Namespace,
 			issuerLabels,
 		)
@@ -195,7 +196,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			instance,
 			helper,
 			issuerReq,
-			corev1.InternalCaName,
+			corev1beta1.InternalCaName,
 			issuerLabels,
 			issuerAnnotations,
 			bundle,
@@ -213,10 +214,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1.OpenStackControlPlaneCAReadyCondition,
+				corev1beta1.OpenStackControlPlaneCAReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 				"issuer",
 				customIssuer,
 				err.Error()))
@@ -260,7 +261,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		err := removeIssuerLabel(
 			ctx,
 			helper,
-			corev1.LibvirtCaName,
+			corev1beta1.LibvirtCaName,
 			instance.Namespace,
 			issuerLabels,
 		)
@@ -273,7 +274,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			instance,
 			helper,
 			issuerReq,
-			corev1.LibvirtCaName,
+			corev1beta1.LibvirtCaName,
 			issuerLabels,
 			issuerAnnotations,
 			bundle,
@@ -291,10 +292,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1.OpenStackControlPlaneCAReadyCondition,
+				corev1beta1.OpenStackControlPlaneCAReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 				"issuer",
 				customIssuer,
 				err.Error()))
@@ -337,7 +338,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		err := removeIssuerLabel(
 			ctx,
 			helper,
-			corev1.OvnDbCaName,
+			corev1beta1.OvnDbCaName,
 			instance.Namespace,
 			issuerLabels,
 		)
@@ -350,7 +351,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 			instance,
 			helper,
 			issuerReq,
-			corev1.OvnDbCaName,
+			corev1beta1.OvnDbCaName,
 			issuerLabels,
 			issuerAnnotations,
 			bundle,
@@ -368,10 +369,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		caCertSecretName, err := addIssuerLabelAnnotation(ctx, helper, customIssuer, instance.Namespace, issuerLabels, issuerAnnotations)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1.OpenStackControlPlaneCAReadyCondition,
+				corev1beta1.OpenStackControlPlaneCAReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 				"issuer",
 				customIssuer,
 				err.Error()))
@@ -406,17 +407,17 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 		}
 	}
 
-	instance.Status.Conditions.MarkTrue(corev1.OpenStackControlPlaneCAReadyCondition, corev1.OpenStackControlPlaneCAReadyMessage)
+	instance.Status.Conditions.MarkTrue(corev1beta1.OpenStackControlPlaneCAReadyCondition, corev1beta1.OpenStackControlPlaneCAReadyMessage)
 
 	// create/update combined CA secret
 	if instance.Spec.TLS.CaBundleSecretName != "" {
 		caSecret, _, err := secret.GetSecret(ctx, helper, instance.Spec.TLS.CaBundleSecretName, instance.Namespace)
 		if err != nil {
 			instance.Status.Conditions.Set(condition.FalseCondition(
-				corev1.OpenStackControlPlaneCAReadyCondition,
+				corev1beta1.OpenStackControlPlaneCAReadyCondition,
 				condition.ErrorReason,
 				condition.SeverityWarning,
-				corev1.OpenStackControlPlaneCAReadyErrorMessage,
+				corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 				"secret",
 				instance.Spec.TLS.CaBundleSecretName,
 				err.Error()))
@@ -490,10 +491,10 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 	if err := secret.EnsureSecrets(ctx, helper, instance, saSecretTemplate, nil); err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			corev1.OpenStackControlPlaneCAReadyErrorMessage,
+			corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 			"secret",
 			tls.CABundleSecret,
 			err.Error()))
@@ -508,7 +509,7 @@ func ReconcileCAs(ctx context.Context, instance *corev1.OpenStackControlPlane, h
 
 func ensureRootCA(
 	ctx context.Context,
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 	issuerReq *certmgrv1.Issuer,
 	caName string,
@@ -516,7 +517,7 @@ func ensureRootCA(
 	annotations map[string]string,
 	bundle *caBundle,
 	caOnlyBundle *caBundle,
-	caCfg corev1.CACertConfig,
+	caCfg corev1beta2.CACertConfig,
 ) (ctrl.Result, error) {
 	// always create a root CA and issuer for the endpoint as we can
 	// not expect that all services are yet configured to be provided with
@@ -547,7 +548,7 @@ func ensureRootCA(
 }
 
 func ensureCaBundles(
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	caName string,
 	caCert []byte,
 	bundle *caBundle,
@@ -572,7 +573,7 @@ func ensureCaBundles(
 		return ctrl.Result{}, fmt.Errorf("caCertStatusBundle.certs is empty")
 	}
 
-	status := corev1.TLSCAStatus{
+	status := corev1beta2.TLSCAStatus{
 		Name:    caName,
 		Expires: caCertStatusBundle.certs[0].expire.Format(time.RFC3339),
 	}
@@ -584,13 +585,13 @@ func ensureCaBundles(
 
 func createRootCACertAndIssuer(
 	ctx context.Context,
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 	selfsignedIssuerReq *certmgrv1.Issuer,
 	caName string,
 	labels map[string]string,
 	annotations map[string]string,
-	caCfg corev1.CACertConfig,
+	caCfg corev1beta2.CACertConfig,
 ) ([]byte, ctrl.Result, error) {
 	// create RootCA Certificate used to sign certificates
 	caCertReq := certmanager.Cert(
@@ -623,10 +624,10 @@ func createRootCACertAndIssuer(
 	ctrlResult, _, err := cert.CreateOrPatch(ctx, helper, nil)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			corev1.OpenStackControlPlaneCAReadyErrorMessage,
+			corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 			caCertReq.Kind,
 			caCertReq.Name,
 			err.Error()))
@@ -634,10 +635,10 @@ func createRootCACertAndIssuer(
 		return nil, ctrlResult, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			corev1.OpenStackControlPlaneCAReadyRunningMessage))
+			corev1beta1.OpenStackControlPlaneCAReadyRunningMessage))
 
 		return nil, ctrlResult, nil
 	}
@@ -655,10 +656,10 @@ func createRootCACertAndIssuer(
 	ctrlResult, err = issuer.CreateOrPatch(ctx, helper)
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			corev1.OpenStackControlPlaneCAReadyErrorMessage,
+			corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 			issuerReq.Kind,
 			issuerReq.GetName(),
 			err.Error()))
@@ -666,10 +667,10 @@ func createRootCACertAndIssuer(
 		return nil, ctrlResult, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			corev1.OpenStackControlPlaneCAReadyRunningMessage))
+			corev1beta1.OpenStackControlPlaneCAReadyRunningMessage))
 
 		return nil, ctrlResult, nil
 	}
@@ -686,17 +687,17 @@ func createRootCACertAndIssuer(
 
 func getCAFromSecret(
 	ctx context.Context,
-	instance *corev1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	helper *helper.Helper,
 	secretName string,
 ) ([]byte, ctrl.Result, error) {
 	caSecret, ctrlResult, err := secret.GetDataFromSecret(ctx, helper, secretName, time.Duration(5), "ca.crt")
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			corev1.OpenStackControlPlaneCAReadyErrorMessage,
+			corev1beta1.OpenStackControlPlaneCAReadyErrorMessage,
 			"secret",
 			secretName,
 			err.Error()))
@@ -704,10 +705,10 @@ func getCAFromSecret(
 		return nil, ctrlResult, err
 	} else if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			corev1.OpenStackControlPlaneCAReadyCondition,
+			corev1beta1.OpenStackControlPlaneCAReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			corev1.OpenStackControlPlaneCAReadyRunningMessage))
+			corev1beta1.OpenStackControlPlaneCAReadyRunningMessage))
 
 		return nil, ctrlResult, nil
 	}
@@ -947,7 +948,7 @@ func patchIssuer(
 	return nil
 }
 
-func getIssuerAnnotations(certConfig *corev1.CertConfig) map[string]string {
+func getIssuerAnnotations(certConfig *corev1beta2.CertConfig) map[string]string {
 	annotations := map[string]string{}
 	certDuration := certConfig.GetDurationHours()
 	if certDuration == "" {

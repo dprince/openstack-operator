@@ -33,6 +33,7 @@ import (
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -41,7 +42,7 @@ import (
 )
 
 // ReconcileNova -
-func ReconcileNova(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileNova(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	nova := &novav1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova",
@@ -430,7 +431,7 @@ func noVNCProxyEnabled(vncproxy novav1.NovaNoVNCProxyTemplate) bool {
 }
 
 // NovaImageMatch - return true if the nova images match on the ControlPlane and Version, or if Nova is not enabled
-func NovaImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func NovaImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Nova.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.NovaAPIImage, version.Status.ContainerImages.NovaAPIImage) ||

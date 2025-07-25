@@ -31,7 +31,7 @@ import (
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
-	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/service"
@@ -361,7 +361,7 @@ type KeystoneSection struct {
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// Template - Overrides to use when creating the Keystone service
-	Template *keystonev1.KeystoneAPISpecCore `json:"template,omitempty"`
+	Template *keystonev2.KeystoneAPISpecCore `json:"template,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	// +operator-sdk:csv:customresourcedefinitions:type=spec

@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,7 +34,7 @@ const (
 // ReconcileMemcacheds -
 func ReconcileMemcacheds(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 ) (ctrl.Result, error) {
@@ -141,7 +142,7 @@ func ReconcileMemcacheds(
 // reconcileMemcached -
 func reconcileMemcached(
 	ctx context.Context,
-	instance *corev1beta1.OpenStackControlPlane,
+	instance *corev1beta2.OpenStackControlPlane,
 	version *corev1beta1.OpenStackVersion,
 	helper *helper.Helper,
 	name string,
@@ -288,7 +289,7 @@ func reconcileMemcached(
 }
 
 // MemcachedImageMatch - return true if the memcached images match on the ControlPlane and Version, or if Memcached is not enabled
-func MemcachedImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func MemcachedImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.Memcached.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraMemcachedImage, version.Status.ContainerImages.InfraMemcachedImage) {

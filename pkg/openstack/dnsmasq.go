@@ -11,13 +11,14 @@ import (
 
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // ReconcileDNSMasqs -
-func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
+func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion, helper *helper.Helper) (ctrl.Result, error) {
 	dnsmasq := &networkv1.DNSMasq{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "dns",
@@ -92,7 +93,7 @@ func ReconcileDNSMasqs(ctx context.Context, instance *corev1beta1.OpenStackContr
 }
 
 // DnsmasqImageMatch - return true if the Dnsmasq images match on the ControlPlane and Version, or if Dnsmasq is not enabled
-func DnsmasqImageMatch(ctx context.Context, controlPlane *corev1beta1.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
+func DnsmasqImageMatch(ctx context.Context, controlPlane *corev1beta2.OpenStackControlPlane, version *corev1beta1.OpenStackVersion) bool {
 	Log := GetLogger(ctx)
 	if controlPlane.Spec.DNS.Enabled {
 		if !stringPointersEqual(controlPlane.Status.ContainerImages.InfraDnsmasqImage, version.Status.ContainerImages.InfraDnsmasqImage) {

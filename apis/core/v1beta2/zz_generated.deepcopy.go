@@ -33,7 +33,7 @@ import (
 	redisv1beta1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	"github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironic_operatorapiv1beta1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
-	apiv1beta1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	apiv1beta2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -43,7 +43,7 @@ import (
 	nova_operatorapiv1beta1 "github.com/openstack-k8s-operators/nova-operator/api/v1beta1"
 	octavia_operatorapiv1beta1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
 	ovn_operatorapiv1beta1 "github.com/openstack-k8s-operators/ovn-operator/api/v1beta1"
-	placement_operatorapiv1beta1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
+	apiv1beta1 "github.com/openstack-k8s-operators/placement-operator/api/v1beta1"
 	swift_operatorapiv1beta1 "github.com/openstack-k8s-operators/swift-operator/api/v1beta1"
 	telemetry_operatorapiv1beta1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -328,7 +328,7 @@ func (in *KeystoneSection) DeepCopyInto(out *KeystoneSection) {
 	*out = *in
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
-		*out = new(apiv1beta1.KeystoneAPISpecCore)
+		*out = new(apiv1beta2.KeystoneAPISpecCore)
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)
@@ -739,7 +739,7 @@ func (in *PlacementSection) DeepCopyInto(out *PlacementSection) {
 	*out = *in
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
-		*out = new(placement_operatorapiv1beta1.PlacementAPISpecCore)
+		*out = new(apiv1beta1.PlacementAPISpecCore)
 		(*in).DeepCopyInto(*out)
 	}
 	in.APIOverride.DeepCopyInto(&out.APIOverride)
