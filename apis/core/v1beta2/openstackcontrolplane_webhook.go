@@ -80,6 +80,9 @@ func (r *OpenStackControlPlane) SetupWebhookWithManager(mgr ctrl.Manager) error 
 
 var _ webhook.Validator = &OpenStackControlPlane{}
 
+// Hub marks this version as a conversion hub.
+func (*OpenStackControlPlane) Hub() {}
+
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackControlPlane) ValidateCreate() (admission.Warnings, error) {
 	openstackcontrolplanelog.Info("validate create", "name", r.Name)

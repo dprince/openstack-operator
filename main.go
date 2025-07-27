@@ -288,6 +288,10 @@ func main() {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane")
 			os.Exit(1)
 		}
+		if err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane v1beta1")
+			os.Exit(1)
+		}
 		if err = (&clientv1.OpenStackClient{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackClient")
 			os.Exit(1)
