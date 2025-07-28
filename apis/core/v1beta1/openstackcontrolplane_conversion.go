@@ -119,6 +119,14 @@ func (src *OpenStackControlPlane) convertKeystoneTemplateSpecifics(dstRaw conver
 		return fmt.Errorf("failed to unmarshal into v1beta2 keystone template: %w", err)
 	}
 
+	// Handle field conversion from DatabaseInstance (v1beta1) to DatabaseName (v1beta2)
+	// The JSON marshaling won't handle this field name change automatically
+	if src.Spec.Keystone.Template.DatabaseInstance != "" {
+		v1beta2Template.DatabaseName = src.Spec.Keystone.Template.DatabaseInstance
+		openstackcontrolplaneconversionlog.V(1).Info("Converted DatabaseInstance to DatabaseName",
+			"value", src.Spec.Keystone.Template.DatabaseInstance)
+	}
+
 	// Set the converted template
 	templateField.Set(reflect.ValueOf(&v1beta2Template))
 
@@ -163,6 +171,17 @@ func (dst *OpenStackControlPlane) convertKeystoneTemplateSpecificsFrom(srcRaw co
 	err = json.Unmarshal(v1beta2TemplateBytes, &v1beta1Template)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal into v1beta1 keystone template: %w", err)
+	}
+
+	// Handle field conversion from DatabaseName (v1beta2) to DatabaseInstance (v1beta1)
+	// The JSON marshaling won't handle this field name change automatically
+	// We need to access the DatabaseName field from the v1beta2 template using reflection
+	v1beta2TemplateValue := templateField.Elem()
+	databaseNameField := v1beta2TemplateValue.FieldByName("DatabaseName")
+	if databaseNameField.IsValid() && databaseNameField.String() != "" {
+		v1beta1Template.DatabaseInstance = databaseNameField.String()
+		openstackcontrolplaneconversionlog.V(1).Info("Converted DatabaseName to DatabaseInstance",
+			"value", databaseNameField.String())
 	}
 
 	dst.Spec.Keystone.Template = &v1beta1Template
