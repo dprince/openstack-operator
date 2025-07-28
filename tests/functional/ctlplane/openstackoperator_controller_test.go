@@ -2510,7 +2510,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		Expect(OSCtlplane.Labels).Should(HaveKeyWithValue("core.openstack.org/openstackcontrolplane", ""))
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2582,7 +2582,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 			},
 		}
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "openstack",
@@ -2622,7 +2622,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2659,7 +2659,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2696,7 +2696,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2733,7 +2733,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2770,7 +2770,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2807,7 +2807,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2852,7 +2852,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2897,7 +2897,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2941,7 +2941,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -2983,7 +2983,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -3025,7 +3025,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -3067,7 +3067,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		}
 
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",
@@ -3095,7 +3095,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 			"namespace": "bar",
 		}
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "foo",

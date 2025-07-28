@@ -38,7 +38,8 @@ import (
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/apis/client/v1beta1"
-	corev1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
+	corev1beta2 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2"
 	dataplanev1 "github.com/openstack-k8s-operators/openstack-operator/apis/dataplane/v1beta1"
 	telemetryv1 "github.com/openstack-k8s-operators/telemetry-operator/api/v1beta1"
 )
@@ -319,8 +320,8 @@ func GetDefaultOpenStackVersionSpec() map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func GetOpenStackVersion(name types.NamespacedName) *corev1.OpenStackVersion {
-	instance := &corev1.OpenStackVersion{}
+func GetOpenStackVersion(name types.NamespacedName) *corev1beta1.OpenStackVersion {
+	instance := &corev1beta1.OpenStackVersion{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
@@ -343,7 +344,7 @@ func OpenStackVersionRemoveFinalizer(ctx context.Context, name types.NamespacedN
 func CreateOpenStackControlPlane(name types.NamespacedName, spec map[string]interface{}) client.Object {
 
 	raw := map[string]interface{}{
-		"apiVersion": "core.openstack.org/v1beta1",
+		"apiVersion": "core.openstack.org/v1beta2",
 		"kind":       "OpenStackControlPlane",
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
@@ -635,8 +636,8 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 	}
 }
 
-func GetOpenStackControlPlane(name types.NamespacedName) *corev1.OpenStackControlPlane {
-	instance := &corev1.OpenStackControlPlane{}
+func GetOpenStackControlPlane(name types.NamespacedName) *corev1beta2.OpenStackControlPlane {
+	instance := &corev1beta2.OpenStackControlPlane{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())

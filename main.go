@@ -44,6 +44,7 @@ import (
 	topologyv1 "github.com/openstack-k8s-operators/infra-operator/apis/topology/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/operator"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
@@ -134,6 +135,7 @@ func init() {
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
 	utilruntime.Must(corev1beta2.AddToScheme(scheme))
+	utilruntime.Must(keystonev2.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -286,10 +288,6 @@ func main() {
 
 		if err = (&corev1beta2.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane")
-			os.Exit(1)
-		}
-		if err = (&corev1.OpenStackControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackControlPlane v1beta1")
 			os.Exit(1)
 		}
 		if err = (&clientv1.OpenStackClient{}).SetupWebhookWithManager(mgr); err != nil {

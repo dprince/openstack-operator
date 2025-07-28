@@ -43,6 +43,7 @@ import (
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
 	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	manilav1 "github.com/openstack-k8s-operators/manila-operator/api/v1beta1"
 	mariadbv1 "github.com/openstack-k8s-operators/mariadb-operator/api/v1beta1"
 	neutronv1 "github.com/openstack-k8s-operators/neutron-operator/api/v1beta1"
@@ -246,6 +247,8 @@ var _ = BeforeSuite(func() {
 	err = ironicv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = keystonev1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = keystonev2.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = manilav1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
