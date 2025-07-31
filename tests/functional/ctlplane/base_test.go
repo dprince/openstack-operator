@@ -520,8 +520,8 @@ func GetDefaultOpenStackControlPlaneSpec() map[string]interface{} {
 		},
 	}
 	keystoneTemplate := map[string]interface{}{
-		"databaseInstance": names.KeystoneAPIName.Name,
-		"secret":           "osp-secret",
+		"databaseName": names.KeystoneAPIName.Name,
+		"secret":       "osp-secret",
 	}
 	ironicTemplate := map[string]interface{}{
 		"ironicConductors": []interface{}{},

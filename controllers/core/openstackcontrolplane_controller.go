@@ -30,7 +30,7 @@ import (
 	networkv1 "github.com/openstack-k8s-operators/infra-operator/apis/network/v1beta1"
 	redisv1 "github.com/openstack-k8s-operators/infra-operator/apis/redis/v1beta1"
 	ironicv1 "github.com/openstack-k8s-operators/ironic-operator/api/v1beta1"
-	keystonev1 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta1"
+	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	common_helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
@@ -694,7 +694,7 @@ func (r *OpenStackControlPlaneReconciler) SetupWithManager(
 		Owns(&corev1.Secret{}).
 		Owns(&mariadbv1.Galera{}).
 		Owns(&memcachedv1.Memcached{}).
-		Owns(&keystonev1.KeystoneAPI{}).
+		Owns(&keystonev2.KeystoneAPI{}).
 		Owns(&placementv1.PlacementAPI{}).
 		Owns(&glancev1.Glance{}).
 		Owns(&cinderv1.Cinder{}).

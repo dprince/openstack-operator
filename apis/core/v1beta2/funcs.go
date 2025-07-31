@@ -18,6 +18,7 @@ package v1beta2
 
 import (
 	"context"
+	"fmt"
 
 	keystonev2 "github.com/openstack-k8s-operators/keystone-operator/api/v1beta2"
 	corev1beta1 "github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta1"
@@ -25,18 +26,29 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// KeystoneDefault is a no-op to be compatible with the old API
-// This function can be removed once openstack-operator is not calling the
-// Default method on the keystone spec anymore.
+// KeystoneDefault applies default values to KeystoneAPISpecCore fields
 func KeystoneDefault(spec *keystonev2.KeystoneAPISpecCore) {
-	// nothing to do
+	// Apply default APITimeout if not set (minimum is 10, default is 60)
+	if spec.APITimeout == 0 {
+		spec.APITimeout = 60
+	}
 }
 
-// KeystoneSetDefaultRouteAnnotations is a no-op to be compatible with the old API
-// This function can be removed once openstack-operator is not calling the
-// SetDefaultRouteAnnotations method on the keystone spec anymore.
-func KeystoneSetDefaultRouteAnnotations(spec *keystonev2.KeystoneAPISpecCore) {
-	// nothing to do
+// KeystoneSetDefaultRouteAnnotations sets default route timeout annotations for Keystone
+func KeystoneSetDefaultRouteAnnotations(spec *keystonev2.KeystoneAPISpecCore, annotations map[string]string) {
+	const haProxyAnno = "haproxy.router.openshift.io/timeout"
+	const keystoneAnno = "api.keystone.openstack.org/timeout"
+
+	// Set timeout from APITimeout field (defaults to 60 seconds)
+	timeout := fmt.Sprintf("%ds", spec.APITimeout)
+
+	// Only set defaults if annotations don't already exist
+	if _, exists := annotations[haProxyAnno]; !exists {
+		annotations[haProxyAnno] = timeout
+	}
+	if _, exists := annotations[keystoneAnno]; !exists {
+		annotations[keystoneAnno] = timeout
+	}
 }
 
 // KeystoneValidateCreate validates if KeystoneAPI fields are compatible

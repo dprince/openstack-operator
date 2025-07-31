@@ -1306,8 +1306,8 @@ var _ = Describe("OpenStackOperator controller", func() {
 					},
 				},
 				"template": map[string]interface{}{
-					"databaseInstance": names.KeystoneAPIName.Name,
-					"secret":           "osp-secret",
+					"databaseName": names.KeystoneAPIName.Name,
+					"secret":       "osp-secret",
 				},
 			}
 			DeferCleanup(
@@ -2003,7 +2003,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 		It("rejects the OpenStackControlPlane if its name is not that same as the OpenStackVersion's name", func() {
 			raw := map[string]interface{}{
-				"apiVersion": "core.openstack.org/v1beta1",
+				"apiVersion": "core.openstack.org/v1beta2",
 				"kind":       "OpenStackControlPlane",
 				"metadata": map[string]interface{}{
 					"name":      names.OpenStackControlplaneName.Name,
@@ -2035,7 +2035,7 @@ var _ = Describe("OpenStackOperator controller", func() {
 
 		It("accepts the OpenStackControlPlane if its name is the same as the OpenStackVersion's name", func() {
 			raw := map[string]interface{}{
-				"apiVersion": "core.openstack.org/v1beta1",
+				"apiVersion": "core.openstack.org/v1beta2",
 				"kind":       "OpenStackControlPlane",
 				"metadata": map[string]interface{}{
 					"name":      names.OpenStackVersionName2.Name,
@@ -2549,7 +2549,7 @@ var _ = Describe("OpenStackOperator Webhook", func() {
 		spec := GetDefaultOpenStackControlPlaneSpec()
 		spec["tls"] = GetTLSPublicSpec()
 		raw := map[string]interface{}{
-			"apiVersion": "core.openstack.org/v1beta1",
+			"apiVersion": "core.openstack.org/v1beta2",
 			"kind":       "OpenStackControlPlane",
 			"metadata": map[string]interface{}{
 				"name":      "openstack",

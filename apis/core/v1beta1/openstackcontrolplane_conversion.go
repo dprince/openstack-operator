@@ -120,11 +120,17 @@ func (src *OpenStackControlPlane) convertKeystoneTemplateSpecifics(dstRaw conver
 	}
 
 	// Handle field conversion from DatabaseInstance (v1beta1) to DatabaseName (v1beta2)
-	// The JSON marshaling won't handle this field name change automatically
 	if src.Spec.Keystone.Template.DatabaseInstance != "" {
 		v1beta2Template.DatabaseName = src.Spec.Keystone.Template.DatabaseInstance
 		openstackcontrolplaneconversionlog.V(1).Info("Converted DatabaseInstance to DatabaseName",
 			"value", src.Spec.Keystone.Template.DatabaseInstance)
+	}
+
+	// Apply defaults that might have been lost during JSON marshaling
+	// APITimeout has default: 60, minimum: 10 in the CRD
+	if v1beta2Template.APITimeout == 0 {
+		v1beta2Template.APITimeout = 60
+		openstackcontrolplaneconversionlog.V(1).Info("Applied default APITimeout for v1beta2 template", "value", 60)
 	}
 
 	// Set the converted template
@@ -174,7 +180,6 @@ func (dst *OpenStackControlPlane) convertKeystoneTemplateSpecificsFrom(srcRaw co
 	}
 
 	// Handle field conversion from DatabaseName (v1beta2) to DatabaseInstance (v1beta1)
-	// The JSON marshaling won't handle this field name change automatically
 	// We need to access the DatabaseName field from the v1beta2 template using reflection
 	v1beta2TemplateValue := templateField.Elem()
 	databaseNameField := v1beta2TemplateValue.FieldByName("DatabaseName")
@@ -182,6 +187,13 @@ func (dst *OpenStackControlPlane) convertKeystoneTemplateSpecificsFrom(srcRaw co
 		v1beta1Template.DatabaseInstance = databaseNameField.String()
 		openstackcontrolplaneconversionlog.V(1).Info("Converted DatabaseName to DatabaseInstance",
 			"value", databaseNameField.String())
+	}
+
+	// Apply defaults that might have been lost during JSON marshaling
+	// APITimeout has default: 60, minimum: 10 in the CRD
+	if v1beta1Template.APITimeout == 0 {
+		v1beta1Template.APITimeout = 60
+		openstackcontrolplaneconversionlog.V(1).Info("Applied default APITimeout for v1beta1 template", "value", 60)
 	}
 
 	dst.Spec.Keystone.Template = &v1beta1Template

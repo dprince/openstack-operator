@@ -868,7 +868,7 @@ func (r *OpenStackControlPlane) DefaultServices() {
 		}
 		KeystoneDefault(r.Spec.Keystone.Template)
 		initializeOverrideSpec(&r.Spec.Keystone.APIOverride.Route, true)
-		KeystoneSetDefaultRouteAnnotations(r.Spec.Keystone.Template)
+		KeystoneSetDefaultRouteAnnotations(r.Spec.Keystone.Template, r.Spec.Keystone.APIOverride.Route.Annotations)
 	}
 
 	// Manila

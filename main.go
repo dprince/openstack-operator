@@ -103,6 +103,7 @@ func init() {
 	utilruntime.Must(corev1.AddToScheme(scheme))
 	utilruntime.Must(dataplanev1.AddToScheme(scheme))
 	utilruntime.Must(keystonev1.AddToScheme(scheme))
+	utilruntime.Must(keystonev2.AddToScheme(scheme))
 	utilruntime.Must(mariadbv1.AddToScheme(scheme))
 	utilruntime.Must(memcachedv1.AddToScheme(scheme))
 	utilruntime.Must(rabbitmqclusterv2.AddToScheme(scheme))
@@ -135,7 +136,6 @@ func init() {
 	utilruntime.Must(operatorv1beta1.AddToScheme(scheme))
 	utilruntime.Must(topologyv1.AddToScheme(scheme))
 	utilruntime.Must(corev1beta2.AddToScheme(scheme))
-	utilruntime.Must(keystonev2.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
