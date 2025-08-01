@@ -215,26 +215,6 @@ webhooks:
     service:
       name: openstack-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
-      path: /mutate-core-openstack-org-v1beta1-openstackcontrolplane
-  failurePolicy: Fail
-  name: mopenstackcontrolplane.kb.io
-  rules:
-  - apiGroups:
-    - core.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackcontrolplanes
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: openstack-operator-webhook-service
-      namespace: '{{ .OperatorNamespace }}'
       path: /mutate-core-openstack-org-v1beta1-openstackversion
   failurePolicy: Fail
   name: mopenstackversion.kb.io
@@ -248,6 +228,26 @@ webhooks:
     - UPDATE
     resources:
     - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-core-openstack-org-v1beta2-openstackcontrolplane
+  failurePolicy: Fail
+  name: mopenstackcontrolplane.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackcontrolplanes
   sideEffects: None
 - admissionReviewVersions:
   - v1
@@ -350,26 +350,6 @@ webhooks:
     service:
       name: openstack-operator-webhook-service
       namespace: '{{ .OperatorNamespace }}'
-      path: /validate-core-openstack-org-v1beta1-openstackcontrolplane
-  failurePolicy: Fail
-  name: vopenstackcontrolplane.kb.io
-  rules:
-  - apiGroups:
-    - core.openstack.org
-    apiVersions:
-    - v1beta1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - openstackcontrolplanes
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: openstack-operator-webhook-service
-      namespace: '{{ .OperatorNamespace }}'
       path: /validate-core-openstack-org-v1beta1-openstackversion
   failurePolicy: Fail
   name: vopenstackversion.kb.io
@@ -383,6 +363,26 @@ webhooks:
     - UPDATE
     resources:
     - openstackversions
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: openstack-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-core-openstack-org-v1beta2-openstackcontrolplane
+  failurePolicy: Fail
+  name: vopenstackcontrolplane.kb.io
+  rules:
+  - apiGroups:
+    - core.openstack.org
+    apiVersions:
+    - v1beta2
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - openstackcontrolplanes
   sideEffects: None
 - admissionReviewVersions:
   - v1
