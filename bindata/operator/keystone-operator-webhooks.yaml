@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: webhook-service
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: keystone-operator
+  name: keystone-operator-webhook-service
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    openstack.org/operator-name: keystone
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: serving-cert
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: certificate
+    app.kubernetes.io/part-of: keystone-operator
+  name: keystone-operator-serving-cert
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  dnsNames:
+  - keystone-operator-webhook-service.{{ .OperatorNamespace }}.svc
+  - keystone-operator-webhook-service.{{ .OperatorNamespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: keystone-operator-selfsigned-issuer
+  secretName: keystone-operator-webhook-server-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/component: certificate
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: selfsigned-issuer
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: issuer
+    app.kubernetes.io/part-of: keystone-operator
+  name: keystone-operator-selfsigned-issuer
+  namespace: '{{ .OperatorNamespace }}'
+spec:
+  selfSigned: {}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/keystone-operator-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: mutating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: mutatingwebhookconfiguration
+    app.kubernetes.io/part-of: keystone-operator
+  name: keystone-operator-mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: mkeystoneapi.kb.io
+  rules:
+    - apiGroups:
+        - keystone.openstack.org
+      apiVersions:
+      - v1beta2
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - keystoneapis
+  sideEffects: None
+  clientConfig:
+    service:
+      name: keystone-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /mutate-keystone-openstack-org-v1beta2-keystoneapi
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{ .OperatorNamespace }}/keystone-operator-serving-cert'
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/created-by: openstack-operator
+    app.kubernetes.io/instance: validating-webhook-configuration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: validatingwebhookconfiguration
+    app.kubernetes.io/part-of: keystone-operator
+  name: keystone-operator-validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  failurePolicy: Fail
+  name: vkeystoneapi.kb.io
+  rules:
+    - apiGroups:
+        - keystone.openstack.org
+      apiVersions:
+      - v1beta2
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - keystoneapis
+  sideEffects: None
+  clientConfig:
+    service:
+      name: keystone-operator-webhook-service
+      namespace: '{{ .OperatorNamespace }}'
+      path: /validate-keystone-openstack-org-v1beta2-keystoneapi

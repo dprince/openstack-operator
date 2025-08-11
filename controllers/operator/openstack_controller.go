@@ -394,7 +394,7 @@ func containerImageMatch(instance *operatorv1beta1.OpenStack) bool {
 
 func isWebhookEndpoint(name string) bool {
 	// NOTE: this is a static list for all operators with webhooks enabled
-	endpointNames := []string{"openstack-operator-webhook-service", "infra-operator-webhook-service", "openstack-baremetal-operator-webhook-service"}
+	endpointNames := []string{"openstack-operator-webhook-service", "infra-operator-webhook-service", "keystone-operator-webhook-service", "openstack-baremetal-operator-webhook-service"}
 	for _, prefix := range endpointNames {
 		if strings.HasPrefix(name, prefix) {
 			return true
@@ -594,6 +594,15 @@ func (r *OpenStackReconciler) applyOperator(ctx context.Context, instance *opera
 						Name:  "ENABLE_WEBHOOKS",
 						Value: "true",
 					})
+			case operatorv1beta1.KeystoneOperatorName:
+				// enable webhooks on the keystone-operator
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					corev1.EnvVar{
+						Name:  "ENABLE_WEBHOOKS",
+						Value: "true",
+					})
+				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
+					relatedImagesEnv...)
 			default:
 				// disable webhooks per default
 				serviceOp.Deployment.Manager.Env = append(serviceOp.Deployment.Manager.Env,
