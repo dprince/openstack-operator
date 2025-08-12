@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: keystone-operator-system/keystone-operator-serving-cert
+    cert-manager.io/inject-ca-from: openstack-operators/keystone-operator-serving-cert
     controller-gen.kubebuilder.io/version: v0.14.0
   creationTimestamp: null
   name: keystoneapis.keystone.openstack.org
@@ -13,7 +13,7 @@ spec:
       clientConfig:
         service:
           name: keystone-operator-webhook-service
-          namespace: keystone-operator-system
+          namespace: openstack-operators
           path: /convert
       conversionReviewVersions:
       - v1

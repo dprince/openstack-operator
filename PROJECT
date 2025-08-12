@@ -94,4 +94,7 @@ resources:
   kind: OpenStackControlPlane
   path: github.com/openstack-k8s-operators/openstack-operator/apis/core/v1beta2
   version: v1beta2
+  webhooks:
+    conversion: true
+    webhookVersion: v1
 version: "3"
