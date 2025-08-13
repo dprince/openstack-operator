@@ -46,6 +46,17 @@ func (src *OpenStackControlPlane) ConvertTo(dstRaw conversion.Hub) error {
 		return fmt.Errorf("failed to unmarshal into v1beta2 object: %w", err)
 	}
 
+	// Fix the APIVersion to ensure it's set to v1beta2
+	if dst, ok := dstRaw.(interface{ SetAPIVersion(string) }); ok {
+		dst.SetAPIVersion("core.openstack.org/v1beta2")
+	} else {
+		// Use reflection to set the APIVersion field directly
+		dstValue := reflect.ValueOf(dstRaw).Elem()
+		if apiVersionField := dstValue.FieldByName("APIVersion"); apiVersionField.IsValid() && apiVersionField.CanSet() {
+			apiVersionField.SetString("core.openstack.org/v1beta2")
+		}
+	}
+
 	// Handle Keystone-specific conversions that need special attention
 	if err := src.convertKeystoneTemplateSpecifics(dstRaw); err != nil {
 		return fmt.Errorf("failed to convert Keystone template: %w", err)
@@ -70,6 +81,9 @@ func (dst *OpenStackControlPlane) ConvertFrom(srcRaw conversion.Hub) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal into v1beta1 object: %w", err)
 	}
+
+	// Fix the APIVersion to ensure it's set to v1beta1
+	dst.APIVersion = "core.openstack.org/v1beta1"
 
 	// Handle Keystone-specific conversions that need special attention
 	if err := dst.convertKeystoneTemplateSpecificsFrom(srcRaw); err != nil {
