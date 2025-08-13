@@ -46,16 +46,33 @@ func (src *OpenStackControlPlane) ConvertTo(dstRaw conversion.Hub) error {
 		return fmt.Errorf("failed to unmarshal into v1beta2 object: %w", err)
 	}
 
-	// Fix the APIVersion to ensure it's set to v1beta2
-	if dst, ok := dstRaw.(interface{ SetAPIVersion(string) }); ok {
-		dst.SetAPIVersion("core.openstack.org/v1beta2")
-	} else {
-		// Use reflection to set the APIVersion field directly
-		dstValue := reflect.ValueOf(dstRaw).Elem()
-		if apiVersionField := dstValue.FieldByName("APIVersion"); apiVersionField.IsValid() && apiVersionField.CanSet() {
-			apiVersionField.SetString("core.openstack.org/v1beta2")
-		}
-	}
+    // Ensure TypeMeta is set to hub GVK (v1beta2)
+    dstValue := reflect.ValueOf(dstRaw)
+    if dstValue.Kind() == reflect.Interface {
+        dstValue = dstValue.Elem()
+    }
+    if dstValue.Kind() == reflect.Ptr {
+        dstValue = dstValue.Elem()
+    }
+    if dstValue.IsValid() && dstValue.Kind() == reflect.Struct {
+        // Prefer setting via embedded TypeMeta if present
+        if tm := dstValue.FieldByName("TypeMeta"); tm.IsValid() && tm.CanSet() && tm.Kind() == reflect.Struct {
+            if f := tm.FieldByName("APIVersion"); f.IsValid() && f.CanSet() {
+                f.SetString("core.openstack.org/v1beta2")
+            }
+            if f := tm.FieldByName("Kind"); f.IsValid() && f.CanSet() {
+                f.SetString("OpenStackControlPlane")
+            }
+        } else {
+            // Fall back to promoted fields
+            if f := dstValue.FieldByName("APIVersion"); f.IsValid() && f.CanSet() {
+                f.SetString("core.openstack.org/v1beta2")
+            }
+            if f := dstValue.FieldByName("Kind"); f.IsValid() && f.CanSet() {
+                f.SetString("OpenStackControlPlane")
+            }
+        }
+    }
 
 	// Handle Keystone-specific conversions that need special attention
 	if err := src.convertKeystoneTemplateSpecifics(dstRaw); err != nil {
@@ -103,9 +120,15 @@ func (src *OpenStackControlPlane) convertKeystoneTemplateSpecifics(dstRaw conver
 
 	openstackcontrolplaneconversionlog.V(1).Info("Converting Keystone template from v1beta1 to v1beta2")
 
-	// Use reflection to access the v1beta2 keystone template field
-	dstValue := reflect.ValueOf(dstRaw).Elem()
-	specField := dstValue.FieldByName("Spec")
+    // Use reflection to access the v1beta2 keystone template field
+    dstValue := reflect.ValueOf(dstRaw)
+    if dstValue.Kind() == reflect.Interface {
+        dstValue = dstValue.Elem()
+    }
+    if dstValue.Kind() == reflect.Ptr {
+        dstValue = dstValue.Elem()
+    }
+    specField := dstValue.FieldByName("Spec")
 	if !specField.IsValid() {
 		return fmt.Errorf("destination object has no Spec field")
 	}
@@ -159,8 +182,14 @@ func (dst *OpenStackControlPlane) convertKeystoneTemplateSpecificsFrom(srcRaw co
 	openstackcontrolplaneconversionlog.V(1).Info("Converting Keystone template from v1beta2 to v1beta1")
 
 	// Use reflection to access the v1beta2 keystone template field
-	srcValue := reflect.ValueOf(srcRaw).Elem()
-	specField := srcValue.FieldByName("Spec")
+    srcValue := reflect.ValueOf(srcRaw)
+    if srcValue.Kind() == reflect.Interface {
+        srcValue = srcValue.Elem()
+    }
+    if srcValue.Kind() == reflect.Ptr {
+        srcValue = srcValue.Elem()
+    }
+    specField := srcValue.FieldByName("Spec")
 	if !specField.IsValid() {
 		return fmt.Errorf("source object has no Spec field")
 	}
