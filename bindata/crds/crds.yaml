@@ -167,7 +167,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
+    cert-manager.io/inject-ca-from: openstack-operators/openstack-operator-serving-cert
     controller-gen.kubebuilder.io/version: v0.14.0
   name: openstackcontrolplanes.core.openstack.org
 spec:
@@ -176,8 +176,8 @@ spec:
     webhook:
       clientConfig:
         service:
-          name: webhook-service
-          namespace: system
+          name: openstack-operator-webhook-service
+          namespace: openstack-operators
           path: /convert
       conversionReviewVersions:
       - v1
