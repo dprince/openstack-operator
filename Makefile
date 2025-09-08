@@ -313,7 +313,7 @@ KUSTOMIZE_VERSION ?= v5.5.0 #(dprince: bumped to aquire new features like --load
 CONTROLLER_TOOLS_VERSION ?= v0.18.0
 CRD_MARKDOWN_VERSION ?= v0.0.3
 KUTTL_VERSION ?= 0.17.0
-GOTOOLCHAIN_VERSION ?= go1.24.0
+GOTOOLCHAIN_VERSION ?= go1.24.6
 OC_VERSION ?= 4.16.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
