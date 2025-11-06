@@ -18,13 +18,13 @@ require (
 	github.com/openstack-k8s-operators/glance-operator/api v0.6.1-0.20251022111742-64b4039d28a7
 	github.com/openstack-k8s-operators/heat-operator/api v0.6.1-0.20251025092254-de6e9a251638
 	github.com/openstack-k8s-operators/horizon-operator/api v0.6.1-0.20251025090908-00fab1da8f24
-	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20251025092254-9bbe85d92ae4
+	github.com/openstack-k8s-operators/infra-operator/apis v0.6.1-0.20251030184102-82d2cbaafd35
 	github.com/openstack-k8s-operators/ironic-operator/api v0.6.1-0.20251023190508-87e9d60da59a
 	github.com/openstack-k8s-operators/keystone-operator/api v0.6.1-0.20251021163720-bb51cea0d967
 	github.com/openstack-k8s-operators/lib-common/modules/ansible v0.6.1-0.20251021145236-2b84ec9fd9bb
 	github.com/openstack-k8s-operators/lib-common/modules/certmanager v0.6.1-0.20251021145236-2b84ec9fd9bb
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251021145236-2b84ec9fd9bb
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20251021145236-2b84ec9fd9bb
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.6.1-0.20251027074416-ab5c045dbe00
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.6.1-0.20251027074416-ab5c045dbe00
 	github.com/openstack-k8s-operators/lib-common/modules/test v0.6.1-0.20250929092825-4c2402451077
 	github.com/openstack-k8s-operators/manila-operator/api v0.6.1-0.20251025092538-cee75eec6178
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.6.1-0.20251015110425-ad0381ce8cd4
@@ -182,3 +182,5 @@ replace k8s.io/code-generator => k8s.io/code-generator v0.31.13 //allow-merging
 replace k8s.io/component-base => k8s.io/component-base v0.31.13 //allow-merging
 
 replace github.com/cert-manager/cmctl/v2 => github.com/cert-manager/cmctl/v2 v2.1.2-0.20241127223932-88edb96860cf //allow-merging
+
+replace github.com/openstack-k8s-operators/glance-operator/api => github.com/dprince/glance-operator/api v0.0.0-20251106203155-92778fa3c0c6
