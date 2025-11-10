@@ -332,8 +332,8 @@ metadata:
   namespace: '{{ .OperatorNamespace }}'
 spec:
   dnsNames:
-  - $OPERATOR_NAME-metrics-service.{{ .OperatorNamespace }}.svc
-  - $OPERATOR_NAME-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
+  - $OPERATOR_NAME-controller-manager-metrics-service.{{ .OperatorNamespace }}.svc
+  - $OPERATOR_NAME-controller-manager-metrics-service.{{ .OperatorNamespace }}.svc.cluster.local
   issuerRef:
     kind: Issuer
     name: $OPERATOR_NAME-selfsigned-issuer
@@ -358,15 +358,15 @@ spec:
       ca:
         secret:
           key: ca.crt
-          name: metrics-server-cert
+          name: $OPERATOR_NAME-metrics-server-cert
       cert:
         secret:
           key: tls.crt
-          name: metrics-server-cert
+          name: $OPERATOR_NAME-metrics-server-cert
       insecureSkipVerify: false
       keySecret:
         key: tls.key
-        name: metrics-server-cert
+        name: $OPERATOR_NAME-metrics-server-cert
       serverName: $OPERATOR_NAME-controller-manager-metrics-service.{{ .OperatorNamespace }}.svc
   selector:
     matchLabels:
