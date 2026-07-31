@@ -75,6 +75,21 @@ if [ -d /tmp/recipes ]; then
   done
 fi
 
+# Discover and install Agent Skills. Goose auto-discovers skills from
+# ~/.config/goose/skills/<name>/SKILL.md via its built-in Skills
+# platform extension (enabled by default) - unlike recipes, skills are
+# not registered as slash commands and don't need a config.yaml entry.
+if [ -d /tmp/skills ]; then
+  mkdir -p $HOME/.config/goose/skills
+  for skill in /tmp/skills/*; do
+    [ -f "$skill" ] || continue
+    basename=$(basename "$skill")
+    name="${basename%.*}"
+    mkdir -p "$HOME/.config/goose/skills/${name}"
+    cp "$skill" "$HOME/.config/goose/skills/${name}/SKILL.md"
+  done
+fi
+
 # Discover and register MCP servers from environment variables
 # MCP_SERVER_<name>=<url> entries are set by the controller
 env | grep '^MCP_SERVER_' | while IFS='=' read -r varname url; do
@@ -245,6 +260,13 @@ func assistantPodVolumeMounts(instance *assistantv1.OpenStackAssistant, hasCombi
 				ReadOnly:  true,
 			})
 		}
+		if instance.Spec.Goose.Skills != nil {
+			mounts = append(mounts, corev1.VolumeMount{
+				Name:      "skills",
+				MountPath: "/tmp/skills",
+				ReadOnly:  true,
+			})
+		}
 		if instance.Spec.Goose.Hints != nil {
 			mounts = append(mounts, corev1.VolumeMount{
 				Name:      "hints",
@@ -304,6 +326,18 @@ func assistantPodVolumes(instance *assistantv1.OpenStackAssistant, hasCombinedCA
 					ConfigMap: &corev1.ConfigMapVolumeSource{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: *instance.Spec.Goose.Recipes,
+						},
+					},
+				},
+			})
+		}
+		if instance.Spec.Goose.Skills != nil {
+			volumes = append(volumes, corev1.Volume{
+				Name: "skills",
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: *instance.Spec.Goose.Skills,
 						},
 					},
 				},

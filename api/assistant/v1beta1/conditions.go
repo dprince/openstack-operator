@@ -46,4 +46,7 @@ const (
 
 	// OpenStackAssistantHintsWaitingMessage
 	OpenStackAssistantHintsWaitingMessage = "Waiting for Goose hints ConfigMap"
+
+	// OpenStackAssistantSkillsWaitingMessage
+	OpenStackAssistantSkillsWaitingMessage = "Waiting for Goose skills ConfigMap"
 )

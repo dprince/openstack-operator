@@ -85,6 +85,14 @@ type GooseConfig struct {
 	// +kubebuilder:validation:Optional
 	Recipes *string `json:"recipes,omitempty"`
 
+	// Skills is a ConfigMap name containing Goose Agent Skill files.
+	// Each key in the ConfigMap becomes a skill named after the key
+	// (extension stripped), written as ~/.config/goose/skills/<name>/SKILL.md.
+	// Unlike Recipes, skills are not explicitly invoked - Goose loads
+	// them automatically when their description matches the task at hand.
+	// +kubebuilder:validation:Optional
+	Skills *string `json:"skills,omitempty"`
+
 	// Hints is a ConfigMap name containing Goose hints/context.
 	// The ConfigMap must have a key "hints" with the content that
 	// will be written to ~/.goosehints in the pod.

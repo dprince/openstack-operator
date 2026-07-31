@@ -297,6 +297,7 @@ func TestAssistantPodSpec_AllVolumeMountsReadOnly(t *testing.T) {
 	instance := newTestInstance()
 	instance.Spec.Goose = &assistantv1.GooseConfig{
 		Recipes: ptr.To("recipes-cm"),
+		Skills:  ptr.To("skills-cm"),
 		Hints:   ptr.To("hints-cm"),
 	}
 	instance.Spec.LightspeedStack.CaBundleSecretName = "ca-secret"
@@ -324,6 +325,39 @@ func TestAssistantPodSpec_RecipesOnlyNoHints(t *testing.T) {
 	}
 	g.Expect(volumeNames).To(gomega.ContainElement("recipes"))
 	g.Expect(volumeNames).NotTo(gomega.ContainElement("hints"))
+}
+
+func TestAssistantPodSpec_SkillsOnly(t *testing.T) {
+	g := gomega.NewWithT(t)
+	instance := newTestInstance()
+	instance.Spec.Goose = &assistantv1.GooseConfig{
+		Skills: ptr.To("skills-cm"),
+	}
+
+	spec := AssistantPodSpec(instance, "hash", nil, false)
+
+	g.Expect(spec.Volumes).To(gomega.HaveLen(3))
+	volumeNames := make([]string, len(spec.Volumes))
+	for i, v := range spec.Volumes {
+		volumeNames[i] = v.Name
+	}
+	g.Expect(volumeNames).To(gomega.ContainElement("skills"))
+
+	var skillsVolume *corev1.Volume
+	for i := range spec.Volumes {
+		if spec.Volumes[i].Name == "skills" {
+			skillsVolume = &spec.Volumes[i]
+			break
+		}
+	}
+	g.Expect(skillsVolume).NotTo(gomega.BeNil())
+	g.Expect(skillsVolume.ConfigMap.Name).To(gomega.Equal("skills-cm"))
+
+	mountNames := make([]string, len(spec.Containers[0].VolumeMounts))
+	for i, m := range spec.Containers[0].VolumeMounts {
+		mountNames[i] = m.Name
+	}
+	g.Expect(mountNames).To(gomega.ContainElement("skills"))
 }
 
 func TestAssistantPodSpec_MCPServers(t *testing.T) {

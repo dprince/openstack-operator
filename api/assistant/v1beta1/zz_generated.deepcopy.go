@@ -34,6 +34,11 @@ func (in *GooseConfig) DeepCopyInto(out *GooseConfig) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Skills != nil {
+		in, out := &in.Skills, &out.Skills
+		*out = new(string)
+		**out = **in
+	}
 	if in.Hints != nil {
 		in, out := &in.Hints, &out.Hints
 		*out = new(string)

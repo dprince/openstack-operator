@@ -227,6 +227,14 @@ spec:
                       Each key in the ConfigMap becomes a recipe file registered as a
                       Goose slash command (e.g., /cluster-health).
                     type: string
+                  skills:
+                    description: |-
+                      Skills is a ConfigMap name containing Goose Agent Skill files.
+                      Each key in the ConfigMap becomes a skill named after the key
+                      (extension stripped), written as ~/.config/goose/skills/<name>/SKILL.md.
+                      Unlike Recipes, skills are not explicitly invoked - Goose loads
+                      them automatically when their description matches the task at hand.
+                    type: string
                 type: object
               lightspeedStack:
                 description: LightspeedStack configuration for the AI backend.

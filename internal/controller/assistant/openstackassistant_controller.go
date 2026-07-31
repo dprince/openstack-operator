@@ -250,6 +250,23 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 		configVars[*instance.Spec.Goose.Recipes] = env.SetValue(recipesHash)
 	}
 
+	// Validate optional Skills ConfigMap
+	if instance.Spec.Goose != nil && instance.Spec.Goose.Skills != nil {
+		_, skillsHash, err := configmap.GetConfigMapAndHashWithName(ctx, helper, *instance.Spec.Goose.Skills, instance.Namespace)
+		if err != nil {
+			if k8s_errors.IsNotFound(err) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					assistantv1.OpenStackAssistantReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					assistantv1.OpenStackAssistantSkillsWaitingMessage))
+				return ctrl.Result{RequeueAfter: time.Duration(10) * time.Second}, nil
+			}
+			return ctrl.Result{}, err
+		}
+		configVars[*instance.Spec.Goose.Skills] = env.SetValue(skillsHash)
+	}
+
 	// Validate optional Hints ConfigMap
 	if instance.Spec.Goose != nil && instance.Spec.Goose.Hints != nil {
 		_, hintsHash, err := configmap.GetConfigMapAndHashWithName(ctx, helper, *instance.Spec.Goose.Hints, instance.Namespace)
@@ -667,6 +684,7 @@ const (
 	providerSecretField = ".spec.lightspeedStack.providerSecret"
 	caBundleSecretField = ".spec.lightspeedStack.caBundleSecretName"
 	recipesField        = ".spec.goose.recipes"
+	skillsField         = ".spec.goose.skills"
 	hintsField          = ".spec.goose.hints"
 )
 
@@ -674,6 +692,7 @@ var allWatchFields = []string{
 	providerSecretField,
 	caBundleSecretField,
 	recipesField,
+	skillsField,
 	hintsField,
 }
 
@@ -707,6 +726,16 @@ func (r *OpenStackAssistantReconciler) SetupWithManager(
 			return nil
 		}
 		return []string{*cr.Spec.Goose.Recipes}
+	}); err != nil {
+		return err
+	}
+
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &assistantv1.OpenStackAssistant{}, skillsField, func(rawObj client.Object) []string {
+		cr := rawObj.(*assistantv1.OpenStackAssistant)
+		if cr.Spec.Goose == nil || cr.Spec.Goose.Skills == nil || *cr.Spec.Goose.Skills == "" {
+			return nil
+		}
+		return []string{*cr.Spec.Goose.Skills}
 	}); err != nil {
 		return err
 	}
