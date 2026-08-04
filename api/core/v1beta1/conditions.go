@@ -105,6 +105,11 @@ const (
 	// OpenStackControlPlaneCAReadyCondition Status=True condition which indicates if the CAs are configured and operational
 	OpenStackControlPlaneCAReadyCondition condition.Type = "OpenStackControlPlaneCAReadyCondition"
 
+	// OpenStackControlPlaneAssistantRBACReadyCondition Status=True condition which indicates if the
+	// OpenStackAssistant RBAC identity (ServiceAccount/Role/RoleBinding/ClusterRole/ClusterRoleBinding)
+	// is configured and operational
+	OpenStackControlPlaneAssistantRBACReadyCondition condition.Type = "OpenStackControlPlaneAssistantRBACReadyCondition"
+
 	// OpenStackControlPlaneCustomTLSReadyCondition Status=True condition which indicates if custom TLS certificate secrets are configured and operational
 	OpenStackControlPlaneCustomTLSReadyCondition condition.Type = "OpenStackControlPlaneCustomTLSReadyCondition"
 
@@ -473,6 +478,15 @@ const (
 
 	// OpenStackControlPlaneCAReadyErrorMessage
 	OpenStackControlPlaneCAReadyErrorMessage = "OpenStackControlPlane CAs %s %s error occured %s"
+
+	// OpenStackControlPlaneAssistantRBACReadyInitMessage
+	OpenStackControlPlaneAssistantRBACReadyInitMessage = "OpenStackControlPlane Assistant RBAC not started"
+
+	// OpenStackControlPlaneAssistantRBACReadyMessage
+	OpenStackControlPlaneAssistantRBACReadyMessage = "OpenStackControlPlane Assistant RBAC completed"
+
+	// OpenStackControlPlaneAssistantRBACReadyErrorMessage
+	OpenStackControlPlaneAssistantRBACReadyErrorMessage = "OpenStackControlPlane Assistant RBAC error occured %s"
 
 	// OpenStackControlPlaneCustomTLSReadyMessage
 	OpenStackControlPlaneCustomTLSReadyMessage = "OpenStackControlPlane custom TLS cert secret available"

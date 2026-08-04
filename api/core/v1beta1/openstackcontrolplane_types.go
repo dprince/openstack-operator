@@ -1167,6 +1167,7 @@ func (instance *OpenStackControlPlane) InitConditions() {
 	// Always-on conditions (no Enabled flag)
 	cl := condition.CreateList(
 		condition.UnknownCondition(OpenStackControlPlaneCAReadyCondition, condition.InitReason, OpenStackControlPlaneCAReadyInitMessage),
+		condition.UnknownCondition(OpenStackControlPlaneAssistantRBACReadyCondition, condition.InitReason, OpenStackControlPlaneAssistantRBACReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneOpenStackVersionInitializationReadyCondition, condition.InitReason, OpenStackControlPlaneOpenStackVersionInitializationReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneInfrastructureReadyCondition, condition.InitReason, OpenStackControlPlaneInfrastructureReadyInitMessage),
 		condition.UnknownCondition(OpenStackControlPlaneBackupConfigReadyCondition, condition.InitReason, OpenStackControlPlaneBackupConfigReadyInitMessage),

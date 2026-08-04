@@ -441,6 +441,12 @@ func (r *OpenStackClientReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		// Restrict access to the MCP port to OpenStackAssistant pods in the
 		// same namespace. This blocks any other pod, including ones in other
 		// namespaces, from reaching the MCP server.
+		//
+		// Cross-repo contract: OpenStackAssistant is reconciled by
+		// lightspeed-operator, not this operator. Its pod must keep carrying
+		// the label below (common.AppSelector: "openstackassistant") for this
+		// NetworkPolicy to keep admitting it - see
+		// lightspeed-operator/internal/controller/openstackassistant_controller.go.
 		mcpNetworkPolicy := &networkingv1.NetworkPolicy{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      instance.Name + "-mcp",

@@ -130,6 +130,20 @@ func (r *OpenStackControlPlaneReconciler) GetLogger(ctx context.Context) logr.Lo
 // +kubebuilder:rbac:groups=config.openshift.io,resources=networks,verbs=get;list;watch;
 // +kubebuilder:rbac:groups=topology.openstack.org,resources=topologies,verbs=get;list;watch;update
 // +kubebuilder:rbac:groups=watcher.openstack.org,resources=watchers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=endpoints;events;persistentvolumeclaims;nodes;persistentvolumes,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=pods/log,verbs=get;list;watch
+// +kubebuilder:rbac:groups=apps,resources=daemonsets;replicasets;statefulsets,verbs=get;list;watch
+// +kubebuilder:rbac:groups=batch,resources=cronjobs,verbs=get;list;watch
+// +kubebuilder:rbac:groups=config.openshift.io,resources=clusteroperators;clusterversions,verbs=get;list;watch
+// +kubebuilder:rbac:groups=machine.openshift.io,resources=machines;machinesets,verbs=get;list;watch
+// +kubebuilder:rbac:groups=nmstate.io,resources=nodenetworkconfigurationpolicies,verbs=get;list;watch
+// +kubebuilder:rbac:groups=storage.k8s.io,resources=storageclasses,verbs=get;list;watch
+// +kubebuilder:rbac:urls=/ls-access,verbs=get
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -523,6 +537,18 @@ func (r *OpenStackControlPlaneReconciler) reconcileNormal(ctx context.Context, i
 		return ctrlResult, nil
 	}
 
+	// Reconcile the assistant's RBAC identity (ServiceAccount/Role/RoleBinding
+	// plus a cluster-scoped ClusterRole/ClusterRoleBinding), once per
+	// namespace under a fixed name, so that a same-namespace OpenStackAssistant
+	// pod (reconciled by lightspeed-operator) can run locked-down without
+	// lightspeed-operator needing any RBAC-management permissions of its own.
+	ctrlResult, err = openstack.ReconcileAssistantRBAC(ctx, instance, helper)
+	if err != nil {
+		return ctrl.Result{}, err
+	} else if (ctrlResult != ctrl.Result{}) {
+		return ctrlResult, nil
+	}
+
 	ctrlResult, err = openstack.ReconcileDNSMasqs(ctx, instance, version, helper)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -769,6 +795,13 @@ func (r *OpenStackControlPlaneReconciler) reconcileDelete(ctx context.Context, i
 		}
 	}
 	helper.GetLogger().Info(fmt.Sprintf("finalizer removed '%s' successfully", versionHelper.GetFinalizer()))
+
+	// ClusterRole/ClusterRoleBinding for the assistant RBAC identity are
+	// cluster-scoped and can't use owner references against the namespaced
+	// OpenStackControlPlane, so they're cleaned up explicitly here.
+	if err := openstack.DeleteAssistantRBAC(ctx, instance, helper); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// remove instance finalizer
 	controllerutil.RemoveFinalizer(instance, helper.GetFinalizer())
