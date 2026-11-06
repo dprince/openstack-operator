@@ -44,3 +44,28 @@ func TestOpenStackAssistantDefaultCABundlePreserved(t *testing.T) {
 	// An explicitly set CaBundleSecretName must not be overwritten.
 	g.Expect(assistant.Spec.CaBundleSecretName).To(gomega.Equal("custom-ca"))
 }
+
+func TestOpenStackAssistantWebImageDefaults(t *testing.T) {
+	g := gomega.NewWithT(t)
+	previousDefaults := openStackAssistantDefaults
+	defer SetupOpenStackAssistantDefaults(previousDefaults)
+	t.Setenv("RELATED_IMAGE_OPENSTACK_ASSISTANT_WEB_IMAGE_URL_DEFAULT", "example.test/web:default")
+	t.Setenv("RELATED_IMAGE_OPENSTACK_ASSISTANT_OAUTH_PROXY_IMAGE_URL_DEFAULT", "example.test/oauth-proxy:default")
+	SetupDefaults()
+
+	assistant := &OpenStackAssistant{Spec: OpenStackAssistantSpec{Web: &WebSpec{Enabled: true}}}
+	assistant.Default()
+	g.Expect(assistant.Spec.Web.Port).To(gomega.Equal(AssistantDefaultWebPort))
+	g.Expect(assistant.Spec.Web.ContainerImage).To(gomega.Equal("example.test/web:default"))
+	g.Expect(assistant.Spec.Web.OAuthProxy).NotTo(gomega.BeNil())
+	g.Expect(assistant.Spec.Web.OAuthProxy.Image).To(gomega.Equal("example.test/oauth-proxy:default"))
+
+	custom := &OpenStackAssistant{Spec: OpenStackAssistantSpec{Web: &WebSpec{
+		Enabled:        true,
+		ContainerImage: "example.test/web:custom",
+		OAuthProxy:     &OAuthProxySpec{Image: "example.test/oauth-proxy:custom"},
+	}}}
+	custom.Default()
+	g.Expect(custom.Spec.Web.ContainerImage).To(gomega.Equal("example.test/web:custom"))
+	g.Expect(custom.Spec.Web.OAuthProxy.Image).To(gomega.Equal("example.test/oauth-proxy:custom"))
+}

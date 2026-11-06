@@ -16,6 +16,7 @@ package openstackassistant
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -26,11 +27,21 @@ import (
 	assistantv1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 )
 
 // workingDirVolumeName is the name of the writable working-directory volume.
 const workingDirVolumeName = "working-dir"
+
+// WebPodConfig contains only reconciled, administrator-controlled web inputs.
+type WebPodConfig struct {
+	Origin           string
+	TLSSecretName    string
+	CookieSecretName string
+	AgentSecretName  string
+	Port             int32
+}
 
 // ValidateMCPServerRefs validates MCP server names and literal URLs before
 // they are exported to the assistant pod.
@@ -106,6 +117,16 @@ func AssistantPodSpecWithCABundle(
 	resolvedMCPServers map[string]string,
 	caBundleSecretName string,
 ) corev1.PodSpec {
+	return AssistantPodSpecWithWeb(instance, configHash, resolvedMCPServers, caBundleSecretName, nil)
+}
+
+func AssistantPodSpecWithWeb(
+	instance *assistantv1.OpenStackAssistant,
+	configHash string,
+	resolvedMCPServers map[string]string,
+	caBundleSecretName string,
+	web *WebPodConfig,
+) corev1.PodSpec {
 	envVars := map[string]env.Setter{}
 	envVars["CONFIG_HASH"] = env.SetValue(configHash)
 	envVars["LIGHTSPEED_URL"] = env.SetValue(instance.Spec.LightspeedStack.BaseURL)
@@ -162,8 +183,82 @@ func AssistantPodSpecWithCABundle(
 	if instance.Spec.NodeSelector != nil {
 		podSpec.NodeSelector = *instance.Spec.NodeSelector
 	}
+	if web != nil {
+		addWebToPod(instance, &podSpec, web)
+	}
 
 	return podSpec
+}
+
+func addWebToPod(instance *assistantv1.OpenStackAssistant, spec *corev1.PodSpec, web *WebPodConfig) {
+	spec.TerminationGracePeriodSeconds = ptr.To[int64](30)
+	agent := &spec.Containers[0]
+	agent.Env = append(agent.Env,
+		corev1.EnvVar{Name: "ASSISTANT_WEB_ENABLED", Value: "true"},
+		corev1.EnvVar{Name: "ASSISTANT_AGENT_SECRET_FILE", Value: "/etc/assistant-private/agent/secret"},
+	)
+	agent.VolumeMounts = append(agent.VolumeMounts,
+		corev1.VolumeMount{Name: "agent-secret", MountPath: "/etc/assistant-private/agent", ReadOnly: true},
+	)
+	agent.ReadinessProbe = &corev1.Probe{ProbeHandler: corev1.ProbeHandler{Exec: &corev1.ExecAction{Command: []string{"bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/3284"}}}, InitialDelaySeconds: 3, PeriodSeconds: 10}
+	webEnv := []corev1.EnvVar{
+		{Name: "ASSISTANT_UID", Value: string(instance.UID)},
+		{Name: "ASSISTANT_NAMESPACE", Value: instance.Namespace},
+		{Name: "ASSISTANT_NAME", Value: instance.Name},
+		{Name: "ASSISTANT_PUBLIC_ORIGIN", Value: web.Origin},
+		{Name: "ASSISTANT_AGENT_URL", Value: "ws://127.0.0.1:3284/acp"},
+		{Name: "ASSISTANT_AGENT_SECRET_FILE", Value: "/etc/assistant-private/agent/secret"},
+		{Name: "ASSISTANT_AGENT_CWD", Value: instance.WorkingDir()},
+		{Name: "ASSISTANT_WEB_DB_PATH", Value: "/var/lib/assistant-web/conversations.sqlite"},
+		{Name: "ASSISTANT_WEB_PORT", Value: strconv.Itoa(int(web.Port))},
+		{Name: "ASSISTANT_WEB_HOST", Value: "127.0.0.1"},
+	}
+	webMounts := []corev1.VolumeMount{
+		{Name: workingDirVolumeName, MountPath: "/var/lib/assistant-web", SubPath: "web"},
+		{Name: "agent-secret", MountPath: "/etc/assistant-private/agent", ReadOnly: true},
+	}
+	webPort := strconv.Itoa(int(web.Port))
+	webContainer := corev1.Container{
+		Name: "web", Image: instance.Spec.Web.ContainerImage,
+		SecurityContext: pod.RestrictiveSecurityContext(users.OpenStackAssistantUID, users.OpenStackAssistantGID),
+		Env:             webEnv, VolumeMounts: webMounts, Resources: instance.Spec.Web.Resources,
+		Ports:          []corev1.ContainerPort{{Name: "web-private", ContainerPort: web.Port, Protocol: corev1.ProtocolTCP}},
+		ReadinessProbe: &corev1.Probe{ProbeHandler: corev1.ProbeHandler{Exec: &corev1.ExecAction{Command: []string{"node", "-e", fmt.Sprintf("let s=require('net').connect(%s,'127.0.0.1',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1))", webPort)}}}, InitialDelaySeconds: 3, PeriodSeconds: 10},
+	}
+	sar := fmt.Sprintf(`{"namespace":%q,"group":"assistant.openstack.org","resource":"openstackassistants","resourceName":%q,"verb":"get"}`, instance.Namespace, instance.Name)
+	proxy := corev1.Container{
+		Name: "oauth-proxy", Image: instance.Spec.Web.OAuthProxy.Image,
+		SecurityContext: pod.RestrictiveSecurityContext(users.OpenStackAssistantUID, users.OpenStackAssistantGID),
+		Resources:       instance.Spec.Web.OAuthProxy.Resources,
+		Args: []string{
+			"--provider=openshift", "--http-address=", "--https-address=:8443",
+			"--openshift-service-account=" + instance.RbacResourceName(),
+			"--openshift-sar=" + sar,
+			"--upstream=http://127.0.0.1:" + webPort,
+			"--tls-cert=/etc/assistant-private/tls/tls.crt", "--tls-key=/etc/assistant-private/tls/tls.key",
+			"--cookie-secret-file=/etc/assistant-private/cookie/session_secret",
+			"--pass-user-headers=true", "--pass-host-header=true", "--cookie-secure=true", "--cookie-httponly=true", "--cookie-samesite=lax",
+			"--upstream-timeout=1h", "--upstream-flush=5ms",
+		},
+		VolumeMounts: []corev1.VolumeMount{
+			{Name: "web-tls", MountPath: "/etc/assistant-private/tls", ReadOnly: true},
+			{Name: "web-cookie", MountPath: "/etc/assistant-private/cookie", ReadOnly: true},
+		},
+		Ports:          []corev1.ContainerPort{{Name: "oauth-https", ContainerPort: 8443, Protocol: corev1.ProtocolTCP}},
+		ReadinessProbe: &corev1.Probe{ProbeHandler: corev1.ProbeHandler{HTTPGet: &corev1.HTTPGetAction{Path: "/oauth/healthz", Port: intstr.FromInt32(8443), Scheme: corev1.URISchemeHTTPS}}, InitialDelaySeconds: 3, PeriodSeconds: 10},
+	}
+	spec.InitContainers = append(spec.InitContainers, corev1.Container{
+		Name: "web-storage", Image: instance.Spec.ContainerImage,
+		Command:         []string{"/bin/sh", "-c", "mkdir -p /work/web && chmod 0770 /work/web"},
+		SecurityContext: pod.RestrictiveSecurityContext(users.OpenStackAssistantUID, users.OpenStackAssistantGID),
+		VolumeMounts:    []corev1.VolumeMount{{Name: workingDirVolumeName, MountPath: "/work"}},
+	})
+	spec.Containers = append(spec.Containers, webContainer, proxy)
+	spec.Volumes = append(spec.Volumes,
+		corev1.Volume{Name: "agent-secret", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: web.AgentSecretName}}},
+		corev1.Volume{Name: "web-cookie", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: web.CookieSecretName}}},
+		corev1.Volume{Name: "web-tls", VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: web.TLSSecretName}}},
+	)
 }
 
 // extraConfigVolumeName returns a deterministic, RFC1123-valid volume name for

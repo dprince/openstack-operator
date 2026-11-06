@@ -49,6 +49,7 @@ import (
 	novav1 "github.com/openstack-k8s-operators/nova-operator/api/nova/v1beta1"
 	placementv1 "github.com/openstack-k8s-operators/nova-operator/api/placement/v1beta1"
 	octaviav1 "github.com/openstack-k8s-operators/octavia-operator/api/v1beta1"
+	assistantv1 "github.com/openstack-k8s-operators/openstack-operator/api/assistant/v1beta1"
 	backupv1 "github.com/openstack-k8s-operators/openstack-operator/api/backup/v1beta1"
 	openstackclientv1 "github.com/openstack-k8s-operators/openstack-operator/api/client/v1beta1"
 	corev1 "github.com/openstack-k8s-operators/openstack-operator/api/core/v1beta1"
@@ -74,6 +75,7 @@ import (
 	mariadb_test "github.com/openstack-k8s-operators/mariadb-operator/api/test/helpers"
 	ovn_test "github.com/openstack-k8s-operators/ovn-operator/api/test/helpers"
 
+	assistantwebhook "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/assistant/v1beta1"
 	backupwebhook "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/backup/v1beta1"
 	clientwebhook "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/client/v1beta1"
 	corewebhook "github.com/openstack-k8s-operators/openstack-operator/internal/webhook/core/v1beta1"
@@ -259,6 +261,8 @@ var _ = BeforeSuite(func() {
 
 	err = openstackclientv1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+	err = assistantv1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 	err = corev1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = routev1.AddToScheme(scheme.Scheme)
@@ -365,6 +369,8 @@ var _ = BeforeSuite(func() {
 
 	err = clientwebhook.SetupOpenStackClientWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
+	err = assistantwebhook.SetupOpenStackAssistantWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
 	err = corewebhook.SetupOpenStackVersionWebhookWithManager(k8sManager)
 	Expect(err).NotTo(HaveOccurred())
 	err = corewebhook.SetupOpenStackControlPlaneWebhookWithManager(k8sManager)
@@ -377,6 +383,7 @@ var _ = BeforeSuite(func() {
 	core_ctrl.SetupVersionDefaults()
 	openstack.SetupServiceOperatorDefaults()
 	openstackclientv1.SetupDefaults()
+	assistantv1.SetupDefaults()
 	corev1.SetupVersionDefaults()
 
 	err = (&client_ctrl.OpenStackClientReconciler{

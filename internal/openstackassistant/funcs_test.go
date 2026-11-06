@@ -389,3 +389,47 @@ func TestAssistantPodSpec_MCPServersHTTPS(t *testing.T) {
 	g.Expect(envMapOf(spec)).To(gomega.HaveKeyWithValue(
 		"MCP_SERVER_openstack", "https://openstackclient-mcp.openstack.svc:8080/openstack/"))
 }
+
+func TestAssistantPodSpec_WebPrivateBoundary(t *testing.T) {
+	g := gomega.NewWithT(t)
+	instance := newTestInstance()
+	instance.UID = "assistant-uid"
+	instance.Spec.Web = &assistantv1.WebSpec{
+		Enabled: true, ContainerImage: "example.test/web:1",
+		OAuthProxy: &assistantv1.OAuthProxySpec{Image: "example.test/proxy:1"},
+	}
+	instance.Spec.ExtraConfig = []assistantv1.ConfigMount{{Name: "goose-overlay", MountPath: "/etc/openstack-goose/config-overlay"}}
+	web := &WebPodConfig{Origin: "https://assistant.apps.example.test", TLSSecretName: "assistant-tls", CookieSecretName: "assistant-cookie", AgentSecretName: "assistant-agent", Port: 3000}
+	spec := AssistantPodSpecWithWeb(instance, "hash", nil, "combined-ca-bundle", web)
+	g.Expect(spec.Containers).To(gomega.HaveLen(3))
+	g.Expect(*spec.TerminationGracePeriodSeconds).To(gomega.Equal(int64(30)))
+	g.Expect(spec.Containers[0].Args).To(gomega.BeEmpty())
+	g.Expect(spec.Containers[0].Env).To(gomega.ContainElement(gomega.And(gomega.HaveField("Name", "ASSISTANT_AGENT_SECRET_FILE"), gomega.HaveField("Value", "/etc/assistant-private/agent/secret"))))
+	g.Expect(spec.Containers[0].Env).To(gomega.ContainElement(gomega.And(gomega.HaveField("Name", "ASSISTANT_WEB_ENABLED"), gomega.HaveField("Value", "true"))))
+	for _, variable := range spec.Containers[0].Env {
+		g.Expect(variable.Name).NotTo(gomega.Equal("GOOSE_SERVER__SECRET_KEY"))
+	}
+	g.Expect(spec.Containers[0].VolumeMounts).To(gomega.ContainElement(gomega.And(gomega.HaveField("Name", "agent-secret"), gomega.HaveField("ReadOnly", true))))
+	g.Expect(spec.Containers[0].VolumeMounts).To(gomega.ContainElement(gomega.And(gomega.HaveField("MountPath", "/etc/openstack-goose/config-overlay"), gomega.HaveField("ReadOnly", true))))
+	for _, mount := range spec.Containers[0].VolumeMounts {
+		g.Expect(mount.Name).NotTo(gomega.Equal("managed-agent-config"))
+	}
+	for _, volume := range spec.Volumes {
+		g.Expect(volume.Name).NotTo(gomega.Equal("managed-agent-config"))
+	}
+	g.Expect(spec.Containers[1].Name).To(gomega.Equal("web"))
+	g.Expect(spec.Containers[2].Name).To(gomega.Equal("oauth-proxy"))
+	g.Expect(spec.Containers[1].Env).To(gomega.ContainElement(gomega.And(gomega.HaveField("Name", "ASSISTANT_PUBLIC_ORIGIN"), gomega.HaveField("Value", web.Origin))))
+	g.Expect(spec.Containers[1].Env).To(gomega.ContainElement(gomega.And(gomega.HaveField("Name", "ASSISTANT_WEB_HOST"), gomega.HaveField("Value", "127.0.0.1"))))
+	for _, variable := range spec.Containers[1].Env {
+		g.Expect(variable.Name).NotTo(gomega.HavePrefix("LIGHTSPEED_"))
+		g.Expect(variable.Name).NotTo(gomega.Equal("NODE_EXTRA_CA_CERTS"))
+	}
+	g.Expect(spec.Containers[1].VolumeMounts).To(gomega.ContainElement(gomega.And(gomega.HaveField("Name", workingDirVolumeName), gomega.HaveField("SubPath", "web"))))
+	g.Expect(spec.Containers[2].Args).To(gomega.ContainElement(gomega.ContainSubstring("--openshift-sar=")))
+	g.Expect(spec.Containers[2].Args).To(gomega.ContainElement("--pass-user-headers=true"))
+	g.Expect(spec.Containers[2].Ports[0].ContainerPort).To(gomega.Equal(int32(8443)))
+	for _, mount := range spec.Containers[2].VolumeMounts {
+		g.Expect(mount.Name).NotTo(gomega.Equal("agent-secret"))
+	}
+}

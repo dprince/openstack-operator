@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/route"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/tls"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	corev1 "k8s.io/api/core/v1"
@@ -26,12 +27,38 @@ import (
 
 const (
 	// OpenStackAssistantContainerImage is the fall-back container image for OpenStackAssistant
-	OpenStackAssistantContainerImage = "quay.io/openstack-s2i-containers/openstack-goose:master-latest"
+	//OpenStackAssistantContainerImage = "quay.io/openstack-s2i-containers/openstack-goose:master-latest"
+	OpenStackAssistantContainerImage = "quay.io/dprince/openstack-goose:master-latest"
+	OpenStackAssistantOAuthProxyImage = "quay.io/openshift/origin-oauth-proxy@sha256:d532b6d4b9e7c1476e4dcb7f7b60427578e65c62a906ae8e939eacdec8be4517"
 
 	// AssistantDefaultWorkingDir is the default writable working directory (also
 	// used as HOME) for the assistant's configuration, sessions, and runtime state.
-	AssistantDefaultWorkingDir = "/home/goose"
+	AssistantDefaultWorkingDir       = "/home/goose"
+	AssistantDefaultWebPort    int32 = 3000
 )
+
+// OAuthProxySpec configures the mandatory authenticated web ingress.
+type OAuthProxySpec struct {
+	// Image is the OpenShift oauth-proxy image.
+	Image     string                      `json:"image,omitempty"`
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+	// CookieSecretName references an existing Secret with a session_secret key.
+	// When omitted, the operator generates and owns one.
+	CookieSecretName string `json:"cookieSecretName,omitempty"`
+}
+
+// WebSpec enables an authenticated browser endpoint for this assistant.
+type WebSpec struct {
+	Enabled        bool                        `json:"enabled,omitempty"`
+	ContainerImage string                      `json:"containerImage,omitempty"`
+	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
+	// Port is the private web backend port.
+	// +kubebuilder:validation:Minimum=1024
+	// +kubebuilder:validation:Maximum=65535
+	Port       int32               `json:"port,omitempty"`
+	Route      *route.OverrideSpec `json:"route,omitempty"`
+	OAuthProxy *OAuthProxySpec     `json:"oauthProxy,omitempty"`
+}
 
 // ModelRef describes an additional LLM model the assistant may select, e.g. a
 // heavier model for adversarial cross-review or a cheaper model for simple
@@ -190,6 +217,9 @@ type OpenStackAssistantSpec struct {
 	// +kubebuilder:validation:Optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 
+	// Web enables the authenticated PatternFly chat endpoint.
+	Web *WebSpec `json:"web,omitempty"`
+
 	// NodeSelector to target subset of worker nodes for pod scheduling.
 	// +kubebuilder:validation:Optional
 	NodeSelector *map[string]string `json:"nodeSelector,omitempty"`
@@ -205,6 +235,8 @@ type OpenStackAssistantSpec struct {
 type OpenStackAssistantStatus struct {
 	// PodName is the name of the running assistant pod
 	PodName string `json:"podName,omitempty"`
+	// WebURL is set after the authenticated Route is admitted and ready.
+	WebURL string `json:"webURL,omitempty"`
 
 	// Conditions tracks the state of each sub-resource
 	Conditions condition.Conditions `json:"conditions,omitempty" optional:"true"`
@@ -274,9 +306,22 @@ func (instance OpenStackAssistant) WorkingDir() string {
 	return AssistantDefaultWorkingDir
 }
 
+func (instance OpenStackAssistant) WebEnabled() bool {
+	return instance.Spec.Web != nil && instance.Spec.Web.Enabled
+}
+
+func (instance OpenStackAssistant) WebPort() int32 {
+	if instance.Spec.Web != nil && instance.Spec.Web.Port != 0 {
+		return instance.Spec.Web.Port
+	}
+	return AssistantDefaultWebPort
+}
+
 // OpenStackAssistantDefaults holds defaults for the assistant
 type OpenStackAssistantDefaults struct {
-	ContainerImageURL string
+	ContainerImageURL  string
+	WebImageURL        string
+	OAuthProxyImageURL string
 }
 
 var openStackAssistantDefaults OpenStackAssistantDefaults
@@ -289,7 +334,9 @@ func SetupOpenStackAssistantDefaults(defaults OpenStackAssistantDefaults) {
 // SetupDefaults - initializes any CRD field defaults based on environment variables
 func SetupDefaults() {
 	openStackAssistantDefaults := OpenStackAssistantDefaults{
-		ContainerImageURL: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_ASSISTANT_IMAGE_URL_DEFAULT", OpenStackAssistantContainerImage),
+		ContainerImageURL:  util.GetEnvVar("RELATED_IMAGE_OPENSTACK_ASSISTANT_IMAGE_URL_DEFAULT", OpenStackAssistantContainerImage),
+		WebImageURL:        util.GetEnvVar("RELATED_IMAGE_OPENSTACK_ASSISTANT_WEB_IMAGE_URL_DEFAULT", ""),
+		OAuthProxyImageURL: util.GetEnvVar("RELATED_IMAGE_OPENSTACK_ASSISTANT_OAUTH_PROXY_IMAGE_URL_DEFAULT", OpenStackAssistantOAuthProxyImage),
 	}
 
 	SetupOpenStackAssistantDefaults(openStackAssistantDefaults)
@@ -302,5 +349,19 @@ func (r *OpenStackAssistant) Default() {
 	}
 	if r.Spec.CaBundleSecretName == "" {
 		r.Spec.CaBundleSecretName = tls.CABundleSecret
+	}
+	if r.WebEnabled() {
+		if r.Spec.Web.Port == 0 {
+			r.Spec.Web.Port = AssistantDefaultWebPort
+		}
+		if r.Spec.Web.ContainerImage == "" {
+			r.Spec.Web.ContainerImage = openStackAssistantDefaults.WebImageURL
+		}
+		if r.Spec.Web.OAuthProxy == nil {
+			r.Spec.Web.OAuthProxy = &OAuthProxySpec{}
+		}
+		if r.Spec.Web.OAuthProxy.Image == "" {
+			r.Spec.Web.OAuthProxy.Image = openStackAssistantDefaults.OAuthProxyImageURL
+		}
 	}
 }

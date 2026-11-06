@@ -27,7 +27,9 @@ import (
 
 	"github.com/go-logr/logr"
 
+	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,9 +84,11 @@ func (r *OpenStackAssistantReconciler) GetLogger(ctx context.Context) logr.Logge
 // +kubebuilder:rbac:groups=assistant.openstack.org,resources=openstackassistants/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=assistant.openstack.org,resources=openstackassistants/finalizers,verbs=update
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch
-// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="",resources=configmaps;services;secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=route.openshift.io,resources=routes/custom-host,verbs=create;update;patch
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete
@@ -170,9 +174,12 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 	instance.Status.Conditions.Init(&cl)
 	instance.Status.ObservedGeneration = instance.Generation
 
-	// Handle finalizer for ClusterRole cleanup
+	// Handle finalizer cleanup before the assistant's owned resources are removed.
 	if instance.DeletionTimestamp != nil {
 		if controllerutil.ContainsFinalizer(instance, assistantFinalizer) {
+			if err := r.cleanupWeb(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
 			clusterRoleName := clusterRBACName(instance)
 			if err := r.deleteClusterRBAC(ctx, clusterRoleName); err != nil {
 				return ctrl.Result{}, err
@@ -184,7 +191,7 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 			if err := r.Update(ctx, instance); err != nil {
 				return ctrl.Result{}, err
 			}
-			Log.Info("Finalizer removed, ClusterRole and ClusterRoleBinding cleaned up")
+			Log.Info("Finalizer removed, assistant resources cleaned up")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -217,10 +224,25 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	assistantLabels := map[string]string{
 		common.AppSelector: "openstackassistant",
+		webInstanceLabel:   webInstanceID(instance),
 	}
 
 	configVars := make(map[string]env.Setter)
 	effectiveCABundleSecretName := ""
+	if _, err := instance.ValidateCreate(); err != nil {
+		instance.Status.Conditions.Set(condition.FalseCondition(assistantv1.OpenStackAssistantReadyCondition, condition.ErrorReason, condition.SeverityWarning, "%s", err.Error()))
+		return ctrl.Result{}, nil
+	}
+	webConfig, webResult, err := r.reconcileWeb(ctx, instance, helper, assistantLabels, configVars)
+	if err != nil {
+		instance.Status.WebURL = ""
+		instance.Status.Conditions.Set(condition.FalseCondition(assistantv1.OpenStackAssistantReadyCondition, condition.ErrorReason, condition.SeverityWarning, "web reconciliation failed: %s", err.Error()))
+		return ctrl.Result{}, err
+	}
+	if webResult != (ctrl.Result{}) {
+		instance.Status.Conditions.Set(condition.FalseCondition(assistantv1.OpenStackAssistantReadyCondition, condition.RequestedReason, condition.SeverityInfo, "Waiting for authenticated web endpoint"))
+		return webResult, nil
+	}
 
 	// Validate and mount the CA bundle directly. The bundle (by default the
 	// control plane's combined-ca-bundle) already trusts OpenShift
@@ -349,11 +371,12 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	// Build PodSpec
-	spec := openstackassistant.AssistantPodSpecWithCABundle(
+	spec := openstackassistant.AssistantPodSpecWithWeb(
 		instance,
 		configVarsHash,
 		resolvedMCPServers,
 		effectiveCABundleSecretName,
+		webConfig.toPodConfig(),
 	)
 
 	podSpecHash, err := util.ObjectHash(spec)
@@ -461,11 +484,15 @@ func (r *OpenStackAssistantReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	if podReady {
+		if webConfig != nil {
+			instance.Status.WebURL = webConfig.Origin
+		}
 		instance.Status.Conditions.MarkTrue(
 			assistantv1.OpenStackAssistantReadyCondition,
 			assistantv1.OpenStackAssistantReadyMessage,
 		)
 	} else {
+		instance.Status.WebURL = ""
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			assistantv1.OpenStackAssistantReadyCondition,
 			condition.RequestedReason,
@@ -747,13 +774,17 @@ func clusterRoleRules() []rbacv1.PolicyRule {
 
 // fields to index to reconcile when change
 const (
-	caBundleSecretField = ".spec.caBundleSecretName"
-	extraConfigField    = ".spec.extraConfig"
+	caBundleSecretField  = ".spec.caBundleSecretName"
+	extraConfigField     = ".spec.extraConfig"
+	webCookieSecretField = ".spec.web.oauthProxy.cookieSecretName"
+	webTLSSecretField    = ".spec.web.serviceCATLSSecret"
 )
 
 var allWatchFields = []string{
 	caBundleSecretField,
 	extraConfigField,
+	webCookieSecretField,
+	webTLSSecretField,
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -785,11 +816,33 @@ func (r *OpenStackAssistantReconciler) SetupWithManager(
 	}); err != nil {
 		return err
 	}
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &assistantv1.OpenStackAssistant{}, webCookieSecretField, func(rawObj client.Object) []string {
+		cr := rawObj.(*assistantv1.OpenStackAssistant)
+		if cr.Spec.Web == nil || cr.Spec.Web.OAuthProxy == nil || cr.Spec.Web.OAuthProxy.CookieSecretName == "" {
+			return nil
+		}
+		return []string{cr.Spec.Web.OAuthProxy.CookieSecretName}
+	}); err != nil {
+		return err
+	}
+	if err := mgr.GetFieldIndexer().IndexField(ctx, &assistantv1.OpenStackAssistant{}, webTLSSecretField, func(rawObj client.Object) []string {
+		cr := rawObj.(*assistantv1.OpenStackAssistant)
+		if !cr.WebEnabled() {
+			return nil
+		}
+		return []string{webResourceName(cr, "-tls")}
+	}); err != nil {
+		return err
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&assistantv1.OpenStackAssistant{}).
 		Owns(&corev1.Pod{}).
+		Owns(&corev1.Service{}).
+		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Secret{}).
+		Owns(&routev1.Route{}).
+		Owns(&networkingv1.NetworkPolicy{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).

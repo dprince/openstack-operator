@@ -125,6 +125,10 @@ spec:
           value: quay.io/openstack-s2i-containers/openstack-rsyslog:master-latest
         - name: RELATED_IMAGE_OPENSTACK_ASSISTANT_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-goose:master-latest
+        - name: RELATED_IMAGE_OPENSTACK_ASSISTANT_WEB_IMAGE_URL_DEFAULT
+          value: quay.io/dprince/openstack-assistant-ui:latest
+        - name: RELATED_IMAGE_OPENSTACK_ASSISTANT_OAUTH_PROXY_IMAGE_URL_DEFAULT
+          value: quay.io/openshift/origin-oauth-proxy@sha256:d532b6d4b9e7c1476e4dcb7f7b60427578e65c62a906ae8e939eacdec8be4517
         - name: RELATED_IMAGE_OPENSTACK_CLIENT_IMAGE_URL_DEFAULT
           value: quay.io/openstack-s2i-containers/openstack-openstackclient:master-latest
         - name: RELATED_IMAGE_OPENSTACK_MCP_IMAGE_URL_DEFAULT

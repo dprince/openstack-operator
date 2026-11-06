@@ -78,3 +78,6 @@ export TEST_TOBIKO_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-
 export TEST_ANSIBLETEST_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-ansible-test:master-latest
 export TEST_HORIZONTEST_IMAGE_URL_DEFAULT=quay.io/openstack-s2i-containers/openstack-horizontest:master-latest
 export RELATED_IMAGE_OPENSTACK_MUST_GATHER_DEFAULT=quay.io/openstack-k8s-operators/openstack-must-gather:latest
+export RELATED_IMAGE_OPENSTACK_ASSISTANT_WEB_IMAGE_URL_DEFAULT=quay.io/dprince/openstack-assistant-ui:latest
+export RELATED_IMAGE_OPENSTACK_ASSISTANT_OAUTH_PROXY_IMAGE_URL_DEFAULT=quay.io/openshift/origin-oauth-proxy@sha256:d532b6d4b9e7c1476e4dcb7f7b60427578e65c62a906ae8e939eacdec8be4517
+export RELATED_IMAGE_OPENSTACK_ASSISTANT_IMAGE_URL_DEFAULT=quay.io/dprince/openstack-goose:master-latest
